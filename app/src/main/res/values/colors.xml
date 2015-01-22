@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pinkEloviz">#e63656</color>
+    <color name="pinkElovizDark">#c02d48</color>
+    <color name="blue_pressed">#0f427d</color>
+    <color name="blue_normal">#1764bc</color>
+    <color name="green_pressed">#207542</color>
+    <color name="green_normal">#2ea95f</color>
+    <color name="pink_eloviz">#e63656</color>
+    <color name="white">#ffffff</color>
+</resources>

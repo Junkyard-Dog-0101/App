@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Eloviz</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="drawer_open">Tiroir de navigation ouvert</string>
+    <string name="drawer_close">Tiroir de navigation fermé</string>
+    <string name="action_websearch">Recherche web</string>
+    <string name="app_not_available">Désolé, il n\'y a pas de navigateur web disponible</string>
+    <string name="password">Mot de passe</string>
+    <string name="login">Login</string>
+    <string name="connection">Connexion</string>
+    <string name="skip">Passer</string>
+</resources>
