@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:orientation="vertical"
+    android:background="@color/pinkEloviz"
     android:id="@+id/mainLayout"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -14,12 +15,12 @@
 
         <!-- activity view -->
         <FrameLayout
-            android:id="@+id/contenFrame"
+            android:id="@+id/contentFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
         <!-- navigation drawer -->
-        <RelativeLayout
+        <!--<RelativeLayout
             android:layout_gravity="left|start"
             android:layout_width="match_parent"
             android:background="#fff"
@@ -32,7 +33,16 @@
                 android:divider="#eee"
                 android:background="#fff"
                 android:dividerHeight="1dp" />
-        </RelativeLayout>
+        </RelativeLayout>-->
+        <ListView
+            android:id="@+id/left_drawer"
+            android:layout_width="240dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/pink_eloviz"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp" />
 
     </android.support.v4.widget.DrawerLayout>
 
