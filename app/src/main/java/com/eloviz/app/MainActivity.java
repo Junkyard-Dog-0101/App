@@ -180,10 +180,20 @@ public class MainActivity extends ALoginActivity {
         toto.setIcon(R.drawable.home);
         mDrawerFragmentList.add(toto);
 
+        ADrawerFragment tia = new WebRTCStreamFragment();
+        tia.setName("Mes rooms");
+        tia.setIcon(R.drawable.home);
+        mDrawerFragmentList.add(tia);
+
         ADrawerFragment tio = new WebRTCStreamFragment();
-        tio.setName("Mon test webrtc");
+        tio.setName("Mes abonnement");
         tio.setIcon(R.drawable.streaming_list);
         mDrawerFragmentList.add(tio);
+
+       /*ADrawerFragment tia = new WebRTCStreamFragment();
+        tio.setName("Mes rooms");
+        tio.setIcon(R.drawable.home);
+        mDrawerFragmentList.add(tia);*/
 
        /* StreamingFragment tiot = new StreamingFragment();
         tiot.setName("Mon Streaming");

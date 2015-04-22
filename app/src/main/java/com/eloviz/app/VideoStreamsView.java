@@ -43,25 +43,15 @@ import java.util.EnumMap;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * A GLSurfaceView{,.Renderer} that efficiently renders YUV frames from local &
- * remote VideoTracks using the GPU for CSC.  Clients will want to call the
- * constructor, setSize() and updateFrame() as appropriate, but none of the
- * other public methods of this class are of interest to clients (only to system
- * classes).
- */
-public class VideoStreamsView
-    extends GLSurfaceView
-    implements GLSurfaceView.Renderer {
+public class VideoStreamsView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
-  /** Identify which of the two video streams is being addressed. */
+
   public static enum Endpoint { LOCAL, REMOTE };
 
   private final static String TAG = "VideoStreamsView";
   private EnumMap<Endpoint, Rect> rects =
       new EnumMap<Endpoint, Rect>(Endpoint.class);
   private Point screenDimensions;
-  // [0] are local Y,U,V, [1] are remote Y,U,V.
   private int[][] yuvTextures = { { -1, -1, -1}, {-1, -1, -1 }};
   private int posLocation = -1;
   private long lastFPSLogTime = System.nanoTime();
@@ -70,17 +60,15 @@ public class VideoStreamsView
 
   public VideoStreamsView(Context c, Point screenDimensions) {
     super(c);
+   //super.setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
     this.screenDimensions = screenDimensions;
-    setEGLConfigChooser(false);  // Don't need a depth buffer.
+    setEGLConfigChooser(false);
     setEGLContextClientVersion(2);
     setRenderer(this);
     setRenderMode(RENDERMODE_WHEN_DIRTY);
   }
 
-  /** Queue |frame| to be uploaded. */
   public void queueFrame(final Endpoint stream, I420Frame frame) {
-    // Paying for the copy of the YUV data here allows CSC and painting time
-    // to get spent on the render thread instead of the UI thread.
     abortUnless(framePool.validateDimensions(frame), "Frame too large!");
     final I420Frame frameCopy = framePool.takeFrame(frame).copyFrom(frame);
     queueEvent(new Runnable() {
@@ -90,7 +78,7 @@ public class VideoStreamsView
       });
   }
 
-  // Upload the planes from |frame| to the textures owned by this View.
+
   private void updateFrame(Endpoint stream, I420Frame frame) {
     int[] textures = yuvTextures[stream == Endpoint.LOCAL ? 0 : 1];
     texImage2D(frame, textures);
@@ -98,10 +86,8 @@ public class VideoStreamsView
     requestRender();
   }
 
-  /** Inform this View of the dimensions of frames coming from |stream|. */
+
   public void setSize(Endpoint stream, int width, int height) {
-    // Generate 3 texture ids for Y/U/V and place them into |textures|,
-    // allocating enough storage for |width|x|height| pixels.
     int[] textures = yuvTextures[stream == Endpoint.LOCAL ? 0 : 1];
     GLES20.glGenTextures(3, textures, 0);
     for (int i = 0; i < 3; ++i) {
@@ -125,7 +111,7 @@ public class VideoStreamsView
 
   @Override
   protected void onMeasure(int unusedX, int unusedY) {
-    // Go big or go home!
+
     setMeasuredDimension(screenDimensions.x, screenDimensions.y);
   }
 
@@ -144,7 +130,7 @@ public class VideoStreamsView
     long now = System.nanoTime();
     if (lastFPSLogTime == -1 || now - lastFPSLogTime > 1e9) {
       double fps = numFramesSinceLastLog / ((now - lastFPSLogTime) / 1e9);
-      Log.e(TAG, "Rendered FPS: " + fps);
+     // Log.e(TAG, "Rendered FPS: " + fps);
       lastFPSLogTime = now;
       numFramesSinceLastLog = 1;
     }
@@ -168,8 +154,6 @@ public class VideoStreamsView
     GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "y_tex"), 0);
     GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "u_tex"), 1);
     GLES20.glUniform1i(GLES20.glGetUniformLocation(program, "v_tex"), 2);
-
-    // Actually set in drawRectangle(), but queried only once here.
     posLocation = GLES20.glGetAttribLocation(program, "in_pos");
 
     int tcLocation = GLES20.glGetAttribLocation(program, "in_tc");
@@ -181,7 +165,6 @@ public class VideoStreamsView
     checkNoGLES2Error();
   }
 
-  // Wrap a float[] in a direct FloatBuffer using native byte order.
   private static FloatBuffer directNativeFloatBuffer(float[] array) {
     FloatBuffer buffer = ByteBuffer.allocateDirect(array.length * 4).order(
         ByteOrder.nativeOrder()).asFloatBuffer();
@@ -190,7 +173,7 @@ public class VideoStreamsView
     return buffer;
   }
 
-  // Upload the YUV planes from |frame| to |textures|.
+
   private void texImage2D(I420Frame frame, int[] textures) {
     for (int i = 0; i < 3; ++i) {
       ByteBuffer plane = frame.yuvPlanes[i];
@@ -206,7 +189,6 @@ public class VideoStreamsView
     checkNoGLES2Error();
   }
 
-  // Draw |textures| using |vertices| (X,Y coordinates).
   private void drawRectangle(int[] textures, FloatBuffer vertices) {
     for (int i = 0; i < 3; ++i) {
       GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
@@ -221,7 +203,6 @@ public class VideoStreamsView
     checkNoGLES2Error();
   }
 
-  // Compile & attach a |type| shader specified by |source| to |program|.
   private static void addShaderTo(
       int type, String source, int program) {
     int[] result = new int[] { GLES20.GL_FALSE };
@@ -236,32 +217,26 @@ public class VideoStreamsView
     checkNoGLES2Error();
   }
 
-  // Poor-man's assert(): die with |msg| unless |condition| is true.
   private static void abortUnless(boolean condition, String msg) {
     if (!condition) {
       throw new RuntimeException(msg);
     }
   }
 
-  // Assert that no OpenGL ES 2.0 error has been raised.
   private static void checkNoGLES2Error() {
     int error = GLES20.glGetError();
     abortUnless(error == GLES20.GL_NO_ERROR, "GLES20 error: " + error);
   }
 
-  // Remote image should span the full screen.
   private static final FloatBuffer remoteVertices = directNativeFloatBuffer(
       new float[] { -1, 1, -1, -1, 1, 1, 1, -1 });
 
-  // Local image should be thumbnailish.
   private static final FloatBuffer localVertices = directNativeFloatBuffer(
       new float[] { 0.6f, 0.9f, 0.6f, 0.6f, 0.9f, 0.9f, 0.9f, 0.6f });
 
-  // Texture Coordinates mapping the entire texture.
   private static final FloatBuffer textureCoords = directNativeFloatBuffer(
       new float[] { 0, 0, 0, 1, 1, 0, 1, 1 });
 
-  // Pass-through vertex shader.
   private static final String VERTEX_SHADER_STRING =
       "varying vec2 interp_tc;\n" +
       "\n" +
@@ -273,8 +248,6 @@ public class VideoStreamsView
       "  interp_tc = in_tc;\n" +
       "}\n";
 
-  // YUV to RGB pixel shader. Loads a pixel from each plane and pass through the
-  // matrix.
   private static final String FRAGMENT_SHADER_STRING =
       "precision mediump float;\n" +
       "varying vec2 interp_tc;\n" +
@@ -287,7 +260,6 @@ public class VideoStreamsView
       "  float y = texture2D(y_tex, interp_tc).r;\n" +
       "  float u = texture2D(u_tex, interp_tc).r - .5;\n" +
       "  float v = texture2D(v_tex, interp_tc).r - .5;\n" +
-      // CSC according to http://www.fourcc.org/fccyvrgb.php
       "  gl_FragColor = vec4(y + 1.403 * v, " +
       "                      y - 0.344 * u - 0.714 * v, " +
       "                      y + 1.77 * u, 1);\n" +
