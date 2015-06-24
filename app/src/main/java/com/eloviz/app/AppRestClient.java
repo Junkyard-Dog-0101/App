@@ -6,7 +6,7 @@ import com.loopj.android.http.RequestParams;
 
 public class AppRestClient {
 
-    private static final String BASE_URL = "http://eloviz.com/api/";
+    private static final String BASE_URL = "http://eloviz.com/";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 

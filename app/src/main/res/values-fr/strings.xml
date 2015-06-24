@@ -9,5 +9,6 @@
     <string name="password">Mot de passe</string>
     <string name="login">Login</string>
     <string name="connection">Connexion</string>
+    <string name="register">Inscription</string>
     <string name="skip">Passer</string>
 </resources>

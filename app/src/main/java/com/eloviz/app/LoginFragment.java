@@ -1,14 +1,15 @@
 package com.eloviz.app;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import org.apache.http.Header;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +39,7 @@ public class LoginFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         final ImageView logo = (ImageView) getActivity().findViewById(R.id.logoEloviz);
         logo.setVisibility(View.INVISIBLE);
+
         final EditText password = (EditText) getActivity().findViewById(R.id.password_input);
         password.setTypeface(Typeface.MONOSPACE);
         password.setVisibility(View.INVISIBLE);
@@ -111,6 +115,7 @@ public class LoginFragment extends Fragment {
 
                 skipButton.setVisibility(View.VISIBLE);
                 skipButton.setAnimation(AnimationUtils.loadAnimation(getActivity().getBaseContext(), R.anim.fade_in));
+                tryLogin();
             }
         }, 2600);
 
@@ -118,7 +123,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(LoginActivity.this, DrawerActivity.class);*/
-                // startActivity(new Intent(this, Activity2.class));
+        // startActivity(new Intent(this, Activity2.class));
 //                overridePendingTransition(R.anim.push_down_in,R.anim.push_down_out);
                /* startActivity(i);
                 overridePendingTransition(R.anim.push_up_in,R.anim.push_down_out);
@@ -128,13 +133,134 @@ public class LoginFragment extends Fragment {
         connectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    ALoginActivity mainActivity = (ALoginActivity) getActivity();
-                    mainActivity.onLoginSuccess();
+                RequestParams params = new RequestParams();
+                params.put("username", login.getText());
+                params.put("grant_type", "password");
+                params.put("password", password.getText());
+                // params.put("refresh_token", "");
+                //params.put("scope", "data");
+
+                AppRestClient.post("oauth/access_token", params, new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onStart() {
+                        // called before request is started
+                    }
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        // Log.e("toto", timeline.toString());
+                        ALoginActivity mainActivity = (ALoginActivity) getActivity();
+                        String accessToken = null, tokenType = null, refreshToken = null;
+                        Integer expiresIn = null;
+                        try {
+                            accessToken = response.getString("access_token");
+                            tokenType = response.getString("token_type");
+                            expiresIn = response.getInt("expires_in");
+                            refreshToken = response.getString("refresh_token");
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if (accessToken != null && tokenType != null && expiresIn != null && refreshToken != null) {
+                            mainActivity.launchDrawer(accessToken, tokenType, expiresIn, refreshToken);
+                        } else {
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                        //called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                        Log.e("toto", errorResponse.toString());
+                    }
+
+                    @Override
+                    public void onRetry(int retryNo) {
+                        // called when request is retried
+                    }
+                });
+
+
+            }
+        });
+
+
+        final Button registerButton = (Button) getActivity().findViewById(R.id.registerButton);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.contentFrame, new RegisterFragment()).commit();
+            }
+        });
+
+
+        skipButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ALoginActivity mainActivity = (ALoginActivity) getActivity();
+                mainActivity.launchDrawer();
+            }
+        });
+
+        //boolean silent =
+
+
+
+    }
+
+    void tryLogin() {
+        SharedPreferences settings = getActivity().getSharedPreferences("OauthFile", 0);
+        RequestParams params = new RequestParams();
+        // params.put("username", login.getText());
+        params.put("grant_type", "refresh_token");
+        params.put("refresh_token", settings.getString("accessToken", null));
+        // params.put("refresh_token", "");
+        //params.put("scope", "data");
+
+        AppRestClient.post("oauth/access_token", params, new JsonHttpResponseHandler() {
+
+            @Override
+            public void onStart() {
+                // called before request is started
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                // Log.e("toto", timeline.toString());
+                ALoginActivity mainActivity = (ALoginActivity) getActivity();
+                String accessToken = null, tokenType = null, refreshToken = null;
+                Integer expiresIn = null;
+                try {
+                    accessToken = response.getString("access_token");
+                    tokenType = response.getString("token_type");
+                    expiresIn = response.getInt("expires_in");
+                    refreshToken = response.getString("refresh_token");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (accessToken != null && tokenType != null && expiresIn != null && refreshToken != null) {
+                    mainActivity.launchDrawer(accessToken, tokenType, expiresIn, refreshToken);
+                } else {
+
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                //called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                Log.e("toto", errorResponse.toString());
+            }
+
+            @Override
+            public void onRetry(int retryNo) {
+                // called when request is retried
             }
         });
     }
-
-  //  ProgressDialog progress;
+    //  ProgressDialog progress;
 
 
 

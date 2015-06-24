@@ -1,12 +1,17 @@
 package com.eloviz.app;
 
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.format.DateFormat;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -29,6 +34,7 @@ import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -91,11 +97,12 @@ public class WebRTCStreamFragment extends ADrawerFragment {
 
 
         try {
-            socket = IO.socket("http://eloviz.com:3000/simplechat");
+            socket = IO.socket("http://eloviz.com/simplechat");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
+        mIceServerList.add(new PeerConnection.IceServer("stun:eloviz.com"));
+        mIceServerList.add(new PeerConnection.IceServer("turn:eloviz.com", "eloviz", "eloviz"));
         mIceServerList.add(new PeerConnection.IceServer("stun:stun01.sipphone.com"));
         mIceServerList.add(new PeerConnection.IceServer("stun:stun.ekiga.net"));
         mIceServerList.add(new PeerConnection.IceServer("stun:stun.fwdnet.net"));
@@ -117,6 +124,10 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         mIceServerList.add(new PeerConnection.IceServer("stun:stun.xten.com"));
         mIceServerList.add(new PeerConnection.IceServer("stun:stun.voipstunt.com"));
 
+        mIceServerList.add(new PeerConnection.IceServer("turn:numb.viagenie.ca", "webrtc@live.com", "muazkh"));
+        mIceServerList.add(new PeerConnection.IceServer("turn:192.158.29.39:3478?transport=udp", "28224511:1379330808", "JZEOEt2V3Qb0y27GRntt2u2PAYA="));
+        mIceServerList.add(new PeerConnection.IceServer("turn:192.158.29.39:3478?transport=tcp", "28224511:1379330808", "JZEOEt2V3Qb0y27GRntt2u2PAYA="));
+
         PeerConnectionFactory.initializeAndroidGlobals(getActivity());
         factory = new PeerConnectionFactory();
 
@@ -133,6 +144,36 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         lMS.addTrack(videoTrack);
         //lMS.addTrack(factory.createAudioTrack("ARDAMSa0", new AudioSource(0)));
 
+        /*
+my part not working
+   newPeer 4Vas936NxEqyDGnHAAAd
+12 eloviz.min.js:74 Send ice candidate
+   eloviz.min.js:74 getOffer from 4Vas936NxEqyDGnHAAAd
+   eloviz.min.js:74 getOffer - peer is not undefined
+   eloviz.min.js:74 Successfully connected to 4Vas936NxEqyDGnHAAAd
+   eloviz.min.js:74 onaddstream
+   eloviz.min.js:74 Got remote stream !
+6  eloviz.min.js:74 Got ice from 4Vas936NxEqyDGnHAAAd
+
+
+
+
+getOffer from HsXzczt3x_fqs4tKAAAa
+eloviz.min.js:74 getOffer - peer is undefined
+eloviz.min.js:74 onaddstream
+eloviz.min.js:74 Got remote stream !
+2eloviz.min.js:74 Send ice candidate
+eloviz.min.js:74 getOffer from 9OddUB3Lr3gqfFEcAAAb
+eloviz.min.js:74 getOffer - peer is undefined
+eloviz.min.js:74 onaddstream
+eloviz.min.js:74 Got remote stream !
+10eloviz.min.js:74 Send ice candidate
+eloviz.min.js:74 Got ice from 9OddUB3Lr3gqfFEcAAAb
+6 eloviz.min.js:74 Got ice from HsXzczt3x_fqs4tKAAAa
+11 eloviz.min.js:74 Got ice from 9OddUB3Lr3gqfFEcAAAb
+6 eloviz.min.js:74 Got ice from HsXzczt3x_fqs4tKAAAa
+         */
+
         socket.on("newPeer", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -147,8 +188,14 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 }
                 final String idString = buf;
 
-                final PeerConnection peer = factory.createPeerConnection(mIceServerList, new MediaConstraints(), new PCObserver(idString));
+                MediaConstraints mc = new MediaConstraints();
+                MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
+                mc.mandatory.add(dtls);
+                //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
+                //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
 
+                final PeerConnection peer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
+                Log.e(LOG_TAG, "newPeer " + idString);
                 peer.addStream(lMS, new MediaConstraints());
                 Log.i(LOG_TAG, "addStream");
 
@@ -164,13 +211,17 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                             public void onSetSuccess() {
                                 Log.i(LOG_TAG, "Successfully set to " + idString);
                                 JSONObject obj = new JSONObject();
+                                JSONObject obj2 = new JSONObject();
                                 try {
+                                    obj2.put("sdp", sessionDescription.description);
+                                    obj2.put("type", "offer");
                                     obj.put("to", idString);
-                                    obj.put("offer", sessionDescription);
+                                    obj.put("offer", obj2);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                                 socket.emit("sendOffer", obj);
+                                Log.i(LOG_TAG, "sendOffer");
                             }
                         }, sessionDescription);
                     }
@@ -203,7 +254,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 final String sdpString = buf3;
                 final PeerConnection peer = mPeersMap.get(idString);
                 if (peer != null) {
-                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("offer"), sdpString);
+                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour réglé ler problem de newpeer*/
                     peer.setRemoteDescription(new SDPObserver() {
                         @Override
                         public void onSetSuccess() {
@@ -257,6 +308,36 @@ public class WebRTCStreamFragment extends ADrawerFragment {
             }
         });
 
+        socket.on("newMessage", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                JSONObject jsonMessage = (JSONObject) args[0];
+                String buf = "username";
+                String buf2 = null;
+                Date d = new Date();
+                final CharSequence s = DateFormat.format("kk:mm", d.getTime());
+                try {
+                    buf = jsonMessage.getString("from");
+                    buf2 = jsonMessage.getString("message");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                final String from = buf;
+                final String message = buf2;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView textView = (TextView) getActivity().findViewById(R.id.textOutput);
+                        SpannableString spanString = new SpannableString(from);
+                        spanString.setSpan(new StyleSpan(Typeface.BOLD), 0, spanString.length(), 0);
+                        textView.append(s + " ");
+                        textView.append(spanString);
+                        textView.append(" : " + message + "\n");
+                    }
+                });
+            }
+        });
+
         socket.on("getIce", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -280,6 +361,27 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 PeerConnection peer = mPeersMap.get(id);
                 if (peer != null) {
                     peer.addIceCandidate(new IceCandidate(sdpMid, Integer.valueOf(sdpMLineIndex), sdp));
+                }
+            }
+        });
+
+        socket.on(("leavingPeer"), new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                Log.i(LOG_TAG, "leavingPeer");
+                JSONObject jsonMessage = (JSONObject) args[0];
+                String id;
+                try {
+                    id = jsonMessage.getString("id");
+                } catch (JSONException e) {
+                    id = null;
+                    e.printStackTrace();
+                }
+                final PeerConnection peer = mPeersMap.get(id);
+                if (peer != null) {
+                    peer.close();
+                    mPeersMap.remove(id);
+                    Log.i(LOG_TAG, "peer leave " + id);
                 }
             }
         });
@@ -352,10 +454,6 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                         obj2.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
                         obj2.put("sdpMid", iceCandidate.sdpMid);
                         obj2.put("candidate", iceCandidate.sdp);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    try {
                         obj.put("to", mId);
                         obj.put("ice", obj2);
                     } catch (JSONException e) {

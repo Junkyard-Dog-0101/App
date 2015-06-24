@@ -7,5 +7,18 @@
     <color name="green_pressed">#207542</color>
     <color name="green_normal">#2ea95f</color>
     <color name="pink_eloviz">#e63656</color>
-    <color name="white">#ffffff</color>
+    <color name="Red">#F44336</color>
+    <color name="Pink">#E91E63</color>
+    <color name="Purple">#9C27B0</color>
+    <color name="Light_Green">#8BC34A</color>
+    <color name="Lime">#CDDC39</color>
+    <color name="Yellow">#FFEB3B</color>
+    <color name="Amber">#FFC107</color>
+    <color name="Orange">#FF9800</color>
+    <color name="Deep_Orange">#FF5722</color>
+    <color name="Brown">#795548</color>
+    <color name="Grey">#9E9E9E</color>
+    <color name="Blue_Grey">#607D8B</color>
+    <color name="Black">#000000</color>
+    <color name="White">#ffffff</color>
 </resources>
