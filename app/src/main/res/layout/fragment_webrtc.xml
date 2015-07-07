@@ -18,49 +18,21 @@
         android:layout_height="48dp"
         android:orientation="horizontal">
 
-        <TextView
-            android:gravity="center_vertical"
-            android:id="@+id/textViewPseudo"
-            android:textColor="@color/Black"
+        <Button
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:textSize="16sp"
-            android:layout_weight="0.5"
-            android:text="Pseudo" />
+            android:layout_height="wrap_content"
+            android:text="Prev"
+            android:id="@+id/buttonPrev"
+            android:layout_weight="0.5" />
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:id="@+id/buttonNext"
+            android:layout_weight="0.5" />
 
-        <EditText
-            android:gravity="center_vertical"
-            android:id="@+id/textInputPseudo"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:hint="Android" />
+
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:gravity="center_vertical"
-            android:id="@+id/textViewRoom"
-            android:textColor="@color/Black"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:textSize="16sp"
-            android:text="Room" />
-
-        <EditText
-            android:gravity="center_vertical"
-            android:id="@+id/textInputRoom"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:hint="simplechat"/>
-    </LinearLayout>
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

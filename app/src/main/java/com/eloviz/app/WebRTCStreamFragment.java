@@ -48,6 +48,15 @@ public class WebRTCStreamFragment extends ADrawerFragment {
     private MediaStream lMS;
     private PeerConnectionFactory factory;
     private VideoStreamsView vsv;
+    private String roomName = null;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle bundle = this.getArguments();
+        roomName = bundle.getString("room", "simplechat");
+        Log.e(LOG_TAG, roomName);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -97,7 +106,9 @@ public class WebRTCStreamFragment extends ADrawerFragment {
 
 
         try {
-            socket = IO.socket("http://eloviz.com/simplechat");
+            String finalRoom = "http://eloviz.com/simplechat";// + roomName;
+            Log.e(LOG_TAG, finalRoom);
+            socket = IO.socket(finalRoom);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -144,35 +155,6 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         lMS.addTrack(videoTrack);
         //lMS.addTrack(factory.createAudioTrack("ARDAMSa0", new AudioSource(0)));
 
-        /*
-my part not working
-   newPeer 4Vas936NxEqyDGnHAAAd
-12 eloviz.min.js:74 Send ice candidate
-   eloviz.min.js:74 getOffer from 4Vas936NxEqyDGnHAAAd
-   eloviz.min.js:74 getOffer - peer is not undefined
-   eloviz.min.js:74 Successfully connected to 4Vas936NxEqyDGnHAAAd
-   eloviz.min.js:74 onaddstream
-   eloviz.min.js:74 Got remote stream !
-6  eloviz.min.js:74 Got ice from 4Vas936NxEqyDGnHAAAd
-
-
-
-
-getOffer from HsXzczt3x_fqs4tKAAAa
-eloviz.min.js:74 getOffer - peer is undefined
-eloviz.min.js:74 onaddstream
-eloviz.min.js:74 Got remote stream !
-2eloviz.min.js:74 Send ice candidate
-eloviz.min.js:74 getOffer from 9OddUB3Lr3gqfFEcAAAb
-eloviz.min.js:74 getOffer - peer is undefined
-eloviz.min.js:74 onaddstream
-eloviz.min.js:74 Got remote stream !
-10eloviz.min.js:74 Send ice candidate
-eloviz.min.js:74 Got ice from 9OddUB3Lr3gqfFEcAAAb
-6 eloviz.min.js:74 Got ice from HsXzczt3x_fqs4tKAAAa
-11 eloviz.min.js:74 Got ice from 9OddUB3Lr3gqfFEcAAAb
-6 eloviz.min.js:74 Got ice from HsXzczt3x_fqs4tKAAAa
-         */
 
         socket.on("newPeer", new Emitter.Listener() {
             @Override
@@ -388,7 +370,7 @@ eloviz.min.js:74 Got ice from 9OddUB3Lr3gqfFEcAAAb
 
         JSONObject obj = new JSONObject();
         try {
-            obj.put("name", "simplechat");
+            obj.put("name", roomName);
         } catch (JSONException e) {
             e.printStackTrace();
         }

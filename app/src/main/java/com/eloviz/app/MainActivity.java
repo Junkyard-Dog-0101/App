@@ -172,8 +172,9 @@ public class MainActivity extends ALoginActivity {
         toto.setIcon(R.drawable.home);
         mDrawerFragmentList.add(toto);
 
-        ADrawerFragment tia = new WebRTCStreamFragment();
-        tia.setName("Mes rooms");
+       // ADrawerFragment tia = new WebRTCStreamFragment();
+        ADrawerFragment tia = new ConfigStreamFragment();
+        tia.setName("Configuration de Salle");
         tia.setIcon(R.drawable.home);
         mDrawerFragmentList.add(tia);
 
