@@ -49,6 +49,8 @@ public class WebRTCStreamFragment extends ADrawerFragment {
     private PeerConnectionFactory factory;
     private VideoStreamsView vsv;
     private String roomName = null;
+    private PeerConnection mPc;
+    private VideoSource mVideoSource = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -148,9 +150,9 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         if (capturer == null) {
             capturer = VideoCapturer.create("Camera 0, Facing front, Orientation 270", 0);
         }
-        VideoSource videoSource = factory.createVideoSource(capturer, new MediaConstraints());
+        mVideoSource = factory.createVideoSource(capturer, new MediaConstraints());
         lMS = factory.createLocalMediaStream("ARDAMS");
-        VideoTrack videoTrack = factory.createVideoTrack("ARDAMSv0", videoSource);
+        VideoTrack videoTrack = factory.createVideoTrack("ARDAMSv0", mVideoSource);
         videoTrack.addRenderer(new VideoRenderer(new VideoCallbacks(vsv, VideoStreamsView.Endpoint.LOCAL)));
         lMS.addTrack(videoTrack);
         //lMS.addTrack(factory.createAudioTrack("ARDAMSa0", new AudioSource(0)));
@@ -176,19 +178,19 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
                 //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
 
-                final PeerConnection peer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
+                mPc = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
                 Log.e(LOG_TAG, "newPeer " + idString);
-                peer.addStream(lMS, new MediaConstraints());
+                mPc.addStream(lMS, new MediaConstraints());
                 Log.i(LOG_TAG, "addStream");
 
                 MediaConstraints constraints = new MediaConstraints();
                 constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
                 constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
 
-                peer.createOffer(new SDPObserver() {
+                mPc.createOffer(new SDPObserver() {
                     @Override
                     public void onCreateSuccess(final SessionDescription sessionDescription) {
-                        peer.setLocalDescription(new SDPObserver() {
+                        mPc.setLocalDescription(new SDPObserver() {
                             @Override
                             public void onSetSuccess() {
                                 Log.i(LOG_TAG, "Successfully set to " + idString);
@@ -208,7 +210,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                         }, sessionDescription);
                     }
                 }, constraints);
-                mPeersMap.put(idString, peer);
+                mPeersMap.put(idString, mPc);
             }
         });
 
@@ -236,7 +238,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 final String sdpString = buf3;
                 final PeerConnection peer = mPeersMap.get(idString);
                 if (peer != null) {
-                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour réglé ler problem de newpeer*/
+                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour rgl ler problem de newpeer*/
                     peer.setRemoteDescription(new SDPObserver() {
                         @Override
                         public void onSetSuccess() {
@@ -377,6 +379,19 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         socket.connect();
         Log.i(LOG_TAG, "Socket connected");
         socket.emit("joinRoom", obj);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPc != null)
+            mPc.dispose();
+        if(lMS != null)
+            lMS.dispose();
+        if (mVideoSource != null)
+            mVideoSource.dispose();
+        if (factory != null)
+            factory.dispose();
     }
 
     private class VideoCallbacks implements VideoRenderer.Callbacks {

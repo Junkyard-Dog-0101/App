@@ -20,8 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.*;
 
 import org.apache.http.Header;
 import org.json.JSONException;
@@ -251,7 +250,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                 //called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                Log.e("toto", errorResponse.toString());
+              //  Log.e("toto", errorResponse.toString());
             }
 
             @Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="myAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/pinkEloviz</item>
         <item name="colorPrimaryDark">@color/pinkElovizDark</item>
         <item name="android:statusBarColor">@color/pinkElovizDark</item>
@@ -13,5 +13,9 @@
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>
     </style>
-
+    <style name="AppTheme.NoActionBar">
+        <!-- Both of these are needed -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>
