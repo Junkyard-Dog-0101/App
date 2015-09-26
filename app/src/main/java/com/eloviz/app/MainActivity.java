@@ -6,16 +6,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.eloviz.app.models.Oauth;
@@ -23,7 +19,7 @@ import com.github.nkzawa.socketio.client.Socket;
 
 import java.util.ArrayList;
 
-public class MainActivity extends ALoginActivity {
+public class MainActivity extends AppCompatActivity {
     static Socket socket = null;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
@@ -35,95 +31,45 @@ public class MainActivity extends ALoginActivity {
     private boolean isLogin = false;
     private Oauth token = null;
 
-    @Override
-    public Boolean amILogin() {
-        return (token != null);
-    }
+
+ /*   @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initView();
+        if (mToolbar != null) {
+            mToolbar.setTitle("Navigation Drawer");
+            setSupportActionBar(toolbar);
+        }
+        initDrawer();
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-/*Log.e("socket.io", "debut creation");
-
-        try {
-            socket = IO.socket("http://webrtc.dennajort.fr/default/");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        initView();
+        if (mToolbar != null) {
+            mToolbar.setTitle(getTitle());
+            mToolbar.setTitleTextColor(Color.WHITE);
+            setSupportActionBar(mToolbar);
         }
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                //  socket.emit("foo", "hi");
-                //socket.disconnect();
-                JSONObject obj = new JSONObject();
-
-                try {
-                    obj.put("username", "android");
-                    obj.put("body", "coucou");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                socket.emit("sendMessage", obj);
-            }
-
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {}
-
-        }).on("newMessage", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject obj = (JSONObject) args[0];
-                Log.e("fsfs", args[0].toString());
-            }
-        });
-
-
-
-// Receiving an object
-
-        socket.connect();
-
-        Log.e("socket.io", "fin création");*/
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
+        initDrawer();
+       // mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+        //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        selectItem(0);
+        //FragmentManager fragmentManager = getSupportFragmentManager();
+        //fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (mToolbar != null && mDrawerToggle != null)
-            mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     private void initView() {
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+//        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        loadDrawerData();
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new DrawerListAdapter(this, mDrawerFragmentList));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         // mToolbar.setDisplayHomeAsUpEnabled(true);
@@ -148,6 +94,30 @@ public class MainActivity extends ALoginActivity {
     }
 
     @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        return id == R.id.action_settings || mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
         mToolbar.setTitle(mTitle);
@@ -164,8 +134,7 @@ public class MainActivity extends ALoginActivity {
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
-
-    private void loadDrawer() {
+    private void loadDrawerData() {
         mTitle = mDrawerTitle = getTitle();
         ADrawerFragment toto = new StreamingListFragment();
         toto.setName("Accueil");
@@ -178,56 +147,7 @@ public class MainActivity extends ALoginActivity {
         tia.setIcon(R.drawable.home);
         mDrawerFragmentList.add(tia);
 
-//        ADrawerFragment tio = new WebRTCStreamFragment();
-  //      tio.setName("Mes abonnement");
-    //    tio.setIcon(R.drawable.streaming_list);
-      //  mDrawerFragmentList.add(tio);
-
-       /*ADrawerFragment tia = new WebRTCStreamFragment();
-        tio.setName("Mes rooms");
-        tio.setIcon(R.drawable.home);
-        mDrawerFragmentList.add(tia);*/
-
-       /* StreamingFragment tiot = new StreamingFragment();
-        tiot.setName("Mon Streaming");
-        tiot.setIcon(R.drawable.streaming_user);
-        mDrawerFragmentList.add(tiot);*/
-
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.mainLayout);
-        View view = LayoutInflater.from(this).inflate(R.layout.toolbar, null);
-/*        <translate android:fromXDelta="0" android:toXDelta="-100%p" android:duration="300"/>*/
-        Animation fadeIn = new AlphaAnimation(0, 1);
-        // fadeIn.setInterpolator(new DecelerateInterpolator()); //add this
-        fadeIn.setDuration(1000);
-        AnimationSet animation = new AnimationSet(false);
-        animation.addAnimation(fadeIn);
-        view.setAnimation(animation);
-        linearLayout.addView(view, 0);
-        mToolbar = (Toolbar) view;
-        initView();
-        mToolbar.setTitle(getTitle());
-        mToolbar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(mToolbar);
-        initDrawer();
-        mDrawerToggle.syncState();
-        //FragmentManager fragmentManager = getSupportFragmentManager();
-        //fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
-        /* faut pas que j'oublie de penser a regarde le problème sur le left drawer, il marche pas dans le relative layout */
-        selectItem(0);
     }
-
-    public void launchDrawer(String accessToken, String tokenType, Integer expiresIn, String refreshToken) {
-        token = new Oauth(accessToken, tokenType, expiresIn, refreshToken);
-        token.save(this);
-        isLogin = true;
-        loadDrawer();
-    }
-
-    public void launchDrawer() {
-        isLogin = false;
-        loadDrawer();
-    }
-
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override

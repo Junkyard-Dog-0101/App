@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class WebRTCStreamFragment extends ADrawerFragment {
     private static final String LOG_TAG = "WebRTCStreamFragment";
@@ -114,6 +115,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+
         mIceServerList.add(new PeerConnection.IceServer("stun:eloviz.com"));
         mIceServerList.add(new PeerConnection.IceServer("turn:eloviz.com", "eloviz", "eloviz"));
         mIceServerList.add(new PeerConnection.IceServer("stun:stun01.sipphone.com"));
@@ -372,7 +374,9 @@ public class WebRTCStreamFragment extends ADrawerFragment {
 
         JSONObject obj = new JSONObject();
         try {
-            obj.put("name", roomName);
+            UUID idOne = UUID.randomUUID();
+            obj.put("roomName", roomName);
+            obj.put("sender", idOne.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
