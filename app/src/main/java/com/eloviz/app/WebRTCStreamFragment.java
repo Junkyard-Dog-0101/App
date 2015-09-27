@@ -109,7 +109,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
 
 
         try {
-            String finalRoom = "http://eloviz.com/simplechat";// + roomName;
+            String finalRoom = "http://eloviz.com/meeting";// + roomName;
             Log.e(LOG_TAG, finalRoom);
             socket = IO.socket(finalRoom);
         } catch (URISyntaxException e) {
@@ -159,138 +159,39 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         lMS.addTrack(videoTrack);
         //lMS.addTrack(factory.createAudioTrack("ARDAMSa0", new AudioSource(0)));
 
-
-        socket.on("newPeer", new Emitter.Listener() {
+        socket.on("remoteMessage", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                Log.i(LOG_TAG, "newPeer");
-                JSONObject id = (JSONObject) args[0];
+                JSONObject data = (JSONObject) args[0];
                 String buf;
                 try {
-                    buf = id.getString("id");
+                    buf = data.getString("event");
                 } catch (JSONException e) {
                     buf = null;
                     e.printStackTrace();
                 }
-                final String idString = buf;
-
-                MediaConstraints mc = new MediaConstraints();
-                MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
-                mc.mandatory.add(dtls);
-                //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
-                //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
-
-                mPc = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
-                Log.e(LOG_TAG, "newPeer " + idString);
-                mPc.addStream(lMS, new MediaConstraints());
-                Log.i(LOG_TAG, "addStream");
-
-                MediaConstraints constraints = new MediaConstraints();
-                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
-                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
-
-                mPc.createOffer(new SDPObserver() {
-                    @Override
-                    public void onCreateSuccess(final SessionDescription sessionDescription) {
-                        mPc.setLocalDescription(new SDPObserver() {
-                            @Override
-                            public void onSetSuccess() {
-                                Log.i(LOG_TAG, "Successfully set to " + idString);
-                                JSONObject obj = new JSONObject();
-                                JSONObject obj2 = new JSONObject();
-                                try {
-                                    obj2.put("sdp", sessionDescription.description);
-                                    obj2.put("type", "offer");
-                                    obj.put("to", idString);
-                                    obj.put("offer", obj2);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                socket.emit("sendOffer", obj);
-                                Log.i(LOG_TAG, "sendOffer");
-                            }
-                        }, sessionDescription);
+                Log.e("toror", data.toString());
+                if (buf != null)
+                    switch (buf) {
+                        case "hello":
+                            hello(data);
+                            break;
+                        case "helloBack":
+                            helloBack(data);
+                            break;
+                        case "helloFinish":
+                            helloFinish(data);
+                            break;
+                        case "iceCandidate":
+                            iceCandidate(data);
+                            break;
+                        case "renegotiate":
+                            renegotiate(data);
+                            break;
+                        case "renegotiateBack":
+                            renegotiateBack(data);
+                            break;
                     }
-                }, constraints);
-                mPeersMap.put(idString, mPc);
-            }
-        });
-
-        socket.on(("getOffer"), new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                Log.i(LOG_TAG, "getOffer");
-                JSONObject jsonMessage = (JSONObject) args[0];
-                String buf;
-                String buf2;
-                String buf3;
-                try {
-                    buf = jsonMessage.getString("from");
-                    buf2 = jsonMessage.getString("offer");
-                    JSONObject offerMessage = new JSONObject(buf2);
-                    buf3 = offerMessage.getString("sdp");
-                } catch (JSONException e) {
-                    buf = null;
-                    buf2 = null;
-                    buf3 = null;
-                    e.printStackTrace();
-                }
-                final String idString = buf;
-                final String offerString = buf2;
-                final String sdpString = buf3;
-                final PeerConnection peer = mPeersMap.get(idString);
-                if (peer != null) {
-                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour rgl ler problem de newpeer*/
-                    peer.setRemoteDescription(new SDPObserver() {
-                        @Override
-                        public void onSetSuccess() {
-                            Log.i(LOG_TAG, "Successfully connected to " + idString);
-                        }
-                    }, answer);
-                } else {
-                    Log.i(LOG_TAG, "Peer is null");
-
-                    MediaConstraints mc = new MediaConstraints();
-                    MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
-                    mc.mandatory.add(dtls);
-
-                    final PeerConnection newPeer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
-
-                    newPeer.addStream(lMS, new MediaConstraints());
-
-                    final SessionDescription answer = new SessionDescription(SessionDescription.Type.OFFER, sdpString);
-                    newPeer.setRemoteDescription(new SDPObserver() {
-                        @Override
-                        public void onSetSuccess() {
-                            MediaConstraints constraints = new MediaConstraints();
-                            constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
-                            constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
-                            newPeer.createAnswer(new SDPObserver() {
-                                @Override
-                                public void onCreateSuccess(final SessionDescription sessionDescription) {
-                                    newPeer.setLocalDescription(new SDPObserver() {
-                                        @Override
-                                        public void onSetSuccess() {
-                                            JSONObject obj = new JSONObject();
-                                            JSONObject obj2 = new JSONObject();
-                                            try {
-                                                obj2.put("sdp", sessionDescription.description);
-                                                obj2.put("type", "answer");
-                                                obj.put("to", idString);
-                                                obj.put("offer", obj2);
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                            socket.emit("sendOffer", obj);
-                                            Log.i(LOG_TAG, "sendOffer");
-                                        }
-                                    }, sessionDescription);
-                                }
-                            }, constraints);
-                        }
-                    }, answer);
-                    mPeersMap.put(idString, newPeer);
-                }
             }
         });
 
@@ -324,32 +225,6 @@ public class WebRTCStreamFragment extends ADrawerFragment {
             }
         });
 
-        socket.on("getIce", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                Log.i(LOG_TAG, "getIce");
-                JSONObject jsonMessage = (JSONObject) args[0];
-                String id = null;
-                String candidate = null;
-                String sdpMid = null;
-                String sdpMLineIndex = null;
-                String sdp = null;
-                try {
-                    id = jsonMessage.getString("from");
-                    candidate = jsonMessage.getString("ice");
-                    JSONObject jsonCandidate = new JSONObject(candidate);
-                    sdpMid = jsonCandidate.getString("sdpMid");
-                    sdpMLineIndex = jsonCandidate.getString("sdpMLineIndex");
-                    sdp = jsonCandidate.getString("candidate");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                PeerConnection peer = mPeersMap.get(id);
-                if (peer != null) {
-                    peer.addIceCandidate(new IceCandidate(sdpMid, Integer.valueOf(sdpMLineIndex), sdp));
-                }
-            }
-        });
 
         socket.on(("leavingPeer"), new Emitter.Listener() {
             @Override
@@ -382,7 +257,16 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         }
         socket.connect();
         Log.i(LOG_TAG, "Socket connected");
+        Log.e("joinRoom", obj.toString());
         socket.emit("joinRoom", obj);
+        try {
+            JSONObject helloObj = new JSONObject();
+            helloObj.put("event", "hello");
+            Log.e("remoteMessage1", helloObj.toString());
+            socket.emit("remoteMessage", helloObj);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -390,7 +274,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         super.onPause();
         if (mPc != null)
             mPc.dispose();
-        if(lMS != null)
+        if (lMS != null)
             lMS.dispose();
         if (mVideoSource != null)
             mVideoSource.dispose();
@@ -448,19 +332,19 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         public void onIceCandidate(final IceCandidate iceCandidate) {
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
-                    Log.i(LOG_TAG, "onIceCandiate");
+                    Log.e(LOG_TAG, "onIceCandiate");
                     JSONObject obj = new JSONObject();
                     JSONObject obj2 = new JSONObject();
                     try {
                         obj2.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
                         obj2.put("sdpMid", iceCandidate.sdpMid);
                         obj2.put("candidate", iceCandidate.sdp);
-                        obj.put("to", mId);
+                       // obj.put("to", mId);
                         obj.put("ice", obj2);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    socket.emit("sendIce", obj);
+                    sendRemoteMessage("iceCandidate", obj, mId);
                 }
             });
         }
@@ -519,6 +403,309 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         @Override
         public void onSetFailure(String s) {
             Log.e(LOG_TAG, s);
+        }
+    }
+
+    private void hello(JSONObject data) {
+        Log.i(LOG_TAG, "newPeer");
+        //data = (JSONObject) args[0];
+        String buf;
+        try {
+            buf = data.getString("sender");
+        } catch (JSONException e) {
+            buf = null;
+            e.printStackTrace();
+        }
+        final String idString = buf;
+
+        MediaConstraints mc = new MediaConstraints();
+        MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
+        mc.mandatory.add(dtls);
+        //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
+        //mc.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+
+        mPc = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
+        Log.e(LOG_TAG, "newPeer " + idString);
+        mPc.addStream(lMS, new MediaConstraints());
+        Log.i(LOG_TAG, "addStream");
+
+        MediaConstraints constraints = new MediaConstraints();
+        constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
+        constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+
+        mPc.createOffer(new SDPObserver() {
+            @Override
+            public void onCreateSuccess(final SessionDescription sessionDescription) {
+                mPc.setLocalDescription(new SDPObserver() {
+                    @Override
+                    public void onSetSuccess() {
+                        Log.i(LOG_TAG, "Successfully set to " + idString);
+                        JSONObject obj = new JSONObject();
+                        JSONObject obj2 = new JSONObject();
+                        try {
+                            obj2.put("sdp", sessionDescription.description);
+                            obj2.put("type", "offer");
+                           // obj.put("to", idString);
+                            obj.put("offer", obj2);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        sendRemoteMessage("helloBack", obj, idString);
+                        Log.i(LOG_TAG, "sendOffer");
+                    }
+                }, sessionDescription);
+            }
+        }, constraints);
+        mPeersMap.put(idString, mPc);
+    }
+
+    private void helloBack(JSONObject data) {
+        Log.i(LOG_TAG, "getOffer");
+        String buf;
+        String buf2;
+        String buf3;
+        try {
+            buf = data.getString("sender");
+            buf3 = data.getJSONObject("data").getJSONObject("offer").getString("sdp");
+//            buf2 = data.getString("offer");
+//            JSONObject offerMessage = new JSONObject(buf2);
+//            buf3 = offerMessage.getString("sdp");
+  //          buf3 = offerMessage.getString("offer");
+        } catch (JSONException e) {
+            buf = null;
+            buf2 = null;
+            buf3 = null;
+            e.printStackTrace();
+        }
+        final String idString = buf;
+       // final String offerString = buf2;
+        final String sdpString = buf3;
+        //              final PeerConnection peer = mPeersMap.get(idString);
+                /*if (peer != null) {
+                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString);    changer par answer pour rgl ler problem de newpee
+                    peer.setRemoteDescription(new SDPObserver() {
+                        @Override
+                        public void onSetSuccess() {
+                            Log.i(LOG_TAG, "Successfully connected to " + idString);
+                        }
+                    }, answer);
+                } else {*/
+        Log.i(LOG_TAG, "Peer is null");
+
+        MediaConstraints mc = new MediaConstraints();
+        MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
+        mc.mandatory.add(dtls);
+
+        final PeerConnection newPeer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
+
+        newPeer.addStream(lMS, new MediaConstraints());
+
+        final SessionDescription answer = new SessionDescription(SessionDescription.Type.OFFER, sdpString);
+        newPeer.setRemoteDescription(new SDPObserver() {
+            @Override
+            public void onSetSuccess() {
+                MediaConstraints constraints = new MediaConstraints();
+                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
+                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+                newPeer.createAnswer(new SDPObserver() {
+                    @Override
+                    public void onCreateSuccess(final SessionDescription sessionDescription) {
+                        newPeer.setLocalDescription(new SDPObserver() {
+                            @Override
+                            public void onSetSuccess() {
+                                JSONObject obj = new JSONObject();
+                                JSONObject obj2 = new JSONObject();
+                                try {
+                                    obj2.put("sdp", sessionDescription.description);
+                                    obj2.put("type", "answer");
+//                                    obj.put("to", idString);
+                                    obj.put("offer", obj2);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                sendRemoteMessage("helloFinish", obj, idString);
+                                Log.i(LOG_TAG, "sendOffer");
+                            }
+                        }, sessionDescription);
+                    }
+                }, constraints);
+            }
+        }, answer);
+        mPeersMap.put(idString, newPeer);
+    }
+
+    private void helloFinish(JSONObject data) {
+        Log.i(LOG_TAG, "getOffer");
+        String buf;
+        String buf2;
+        String buf3;
+        try {
+            buf = data.getString("sender");
+            buf2 = data.getString("data");
+            JSONObject offerMessage = new JSONObject(buf2);
+            buf3 = offerMessage.getString("offer");
+        } catch (JSONException e) {
+            buf = null;
+            buf2 = null;
+            buf3 = null;
+            e.printStackTrace();
+        }
+        final String idString = buf;
+        final String offerString = buf2;
+        final String sdpString = buf3;
+        final PeerConnection peer = mPeersMap.get(idString);
+        if (peer != null) {
+            SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour rgl ler problem de newpeer*/
+            peer.setRemoteDescription(new SDPObserver() {
+                @Override
+                public void onSetSuccess() {
+                    Log.i(LOG_TAG, "Successfully connected to " + idString);
+                }
+            }, answer);
+        }
+    }
+
+    private void iceCandidate(JSONObject data) {
+        Log.i(LOG_TAG, "getIce");
+        String id = null;
+        String candidate = null;
+        String sdpMid = null;
+        String sdpMLineIndex = null;
+        String sdp = null;
+        try {
+            id = data.getString("sender");
+            JSONObject candidateData = data.getJSONObject("data");
+            candidate = candidateData.getString("ice");
+            JSONObject jsonCandidate = new JSONObject(candidate);
+            sdpMid = jsonCandidate.getString("sdpMid");
+            sdpMLineIndex = jsonCandidate.getString("sdpMLineIndex");
+            sdp = jsonCandidate.getString("candidate");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        PeerConnection peer = mPeersMap.get(id);
+        if (peer != null) {
+            peer.addIceCandidate(new IceCandidate(sdpMid, Integer.valueOf(sdpMLineIndex), sdp));
+        }
+    }
+
+    private void sendRemoteMessage(String event, JSONObject data, String receiver) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("event", event);
+            obj.put("data", data);
+            obj.put("receiver", receiver);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        socket.emit("remoteMessage", obj);
+        Log.e("remoteMessage", obj.toString());
+    }
+
+    private void renegotiate(JSONObject data) {
+        Log.i(LOG_TAG, "renegociate");
+        String buf;
+        String buf2;
+        String buf3;
+        try {
+            buf = data.getString("sender");
+            buf3 = data.getJSONObject("data").getJSONObject("offer").getString("sdp");
+//            buf2 = data.getString("offer");
+//            JSONObject offerMessage = new JSONObject(buf2);
+//            buf3 = offerMessage.getString("sdp");
+            //          buf3 = offerMessage.getString("offer");
+        } catch (JSONException e) {
+            buf = null;
+            buf2 = null;
+            buf3 = null;
+            e.printStackTrace();
+        }
+        final String idString = buf;
+        // final String offerString = buf2;
+        final String sdpString = buf3;
+        //              final PeerConnection peer = mPeersMap.get(idString);
+                /*if (peer != null) {
+                    SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString);    changer par answer pour rgl ler problem de newpee
+                    peer.setRemoteDescription(new SDPObserver() {
+                        @Override
+                        public void onSetSuccess() {
+                            Log.i(LOG_TAG, "Successfully connected to " + idString);
+                        }
+                    }, answer);
+                } else {*/
+        Log.i(LOG_TAG, "Peer is null");
+
+        MediaConstraints mc = new MediaConstraints();
+        MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
+        mc.mandatory.add(dtls);
+
+        final PeerConnection newPeer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString));
+
+        newPeer.addStream(lMS, new MediaConstraints());
+
+        final SessionDescription answer = new SessionDescription(SessionDescription.Type.OFFER, sdpString);
+        newPeer.setRemoteDescription(new SDPObserver() {
+            @Override
+            public void onSetSuccess() {
+                MediaConstraints constraints = new MediaConstraints();
+                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
+                constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+                newPeer.createAnswer(new SDPObserver() {
+                    @Override
+                    public void onCreateSuccess(final SessionDescription sessionDescription) {
+                        newPeer.setLocalDescription(new SDPObserver() {
+                            @Override
+                            public void onSetSuccess() {
+                                JSONObject obj = new JSONObject();
+                                JSONObject obj2 = new JSONObject();
+                                try {
+                                    obj2.put("sdp", sessionDescription.description);
+                                    obj2.put("type", "answer");
+//                                    obj.put("to", idString);
+                                    obj.put("offer", obj2);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                sendRemoteMessage("helloFinish", obj, idString);
+                                Log.i(LOG_TAG, "sendOffer");
+                            }
+                        }, sessionDescription);
+                    }
+                }, constraints);
+            }
+        }, answer);
+        mPeersMap.put(idString, newPeer);
+    }
+
+    private void renegotiateBack(JSONObject data) {
+        Log.i(LOG_TAG, "getOffer");
+        String buf;
+        String buf2;
+        String buf3;
+        try {
+            buf = data.getString("sender");
+            buf2 = data.getString("data");
+            JSONObject offerMessage = new JSONObject(buf2);
+            buf3 = offerMessage.getString("offer");
+        } catch (JSONException e) {
+            buf = null;
+            buf2 = null;
+            buf3 = null;
+            e.printStackTrace();
+        }
+        final String idString = buf;
+        final String offerString = buf2;
+        final String sdpString = buf3;
+        final PeerConnection peer = mPeersMap.get(idString);
+        if (peer != null) {
+            SessionDescription answer = new SessionDescription(SessionDescription.Type.fromCanonicalForm("answer"), sdpString); /*   changer par answer pour rgl ler problem de newpeer*/
+            peer.setRemoteDescription(new SDPObserver() {
+                @Override
+                public void onSetSuccess() {
+                    Log.i(LOG_TAG, "Successfully connected to " + idString);
+                }
+            }, answer);
         }
     }
 }
