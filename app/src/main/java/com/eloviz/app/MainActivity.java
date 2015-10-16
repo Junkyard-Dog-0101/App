@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import com.eloviz.app.models.Oauth;
 import com.github.nkzawa.socketio.client.Socket;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
+    private RelativeLayout mDrawerRelativeLayout;
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private ArrayList<ADrawerFragment> mDrawerFragmentList = new ArrayList<>();
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerList.setAdapter(new DrawerListAdapter(this, mDrawerFragmentList));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        mDrawerRelativeLayout = (RelativeLayout) findViewById(R.id.left_drawer_relative_layout);
         // mToolbar.setDisplayHomeAsUpEnabled(true);
         //mToolbar.setHomeButtonEnabled(true);
     }
@@ -131,20 +134,20 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager.beginTransaction().replace(R.id.contentFrame, mDrawerFragmentList.get(position)).commit();
         mDrawerList.setItemChecked(position, true);
         setTitle(mDrawerFragmentList.get(position).getName());
-        mDrawerLayout.closeDrawer(mDrawerList);
+        mDrawerLayout.closeDrawer(mDrawerRelativeLayout);
     }
 
     private void loadDrawerData() {
         mTitle = mDrawerTitle = getTitle();
         ADrawerFragment toto = new StreamingListFragment();
         toto.setName("Accueil");
-        toto.setIcon(R.drawable.home);
+        toto.setIcon(R.drawable.home_pink);
         mDrawerFragmentList.add(toto);
 
        // ADrawerFragment tia = new WebRTCStreamFragment();
         ADrawerFragment tia = new ConfigStreamFragment();
         tia.setName("Configuration de Salle");
-        tia.setIcon(R.drawable.home);
+        tia.setIcon(R.drawable.home_pink);
         mDrawerFragmentList.add(tia);
 
     }

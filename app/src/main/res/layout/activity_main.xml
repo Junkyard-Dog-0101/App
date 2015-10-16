@@ -1,17 +1,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:background="@color/pinkEloviz"
     android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/pinkEloviz"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <include layout="@layout/toolbar" />
 
     <android.support.v4.widget.DrawerLayout
-        android:layout_width="match_parent"
         android:id="@+id/drawerLayout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <!-- activity view -->
@@ -35,16 +35,50 @@
                 android:background="#fff"
                 android:dividerHeight="1dp" />
         </RelativeLayout>-->
-
-        <ListView
-            android:id="@+id/left_drawer"
+        <RelativeLayout
+            android:id="@+id/left_drawer_relative_layout"
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@color/White"
-            android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp" />
+            android:orientation="vertical"
+            android:background="@color/White">
+            <Space
+                android:id="@+id/left_space"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+            <ListView
+                android:id="@+id/left_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/left_space"
+                android:layout_above="@+id/btn_new"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0dp" />
+
+            <LinearLayout
+                android:id="@+id/btn_new"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_login"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="35dp"
+                    android:text="pute" />
+
+                <Button
+                    android:id="@+id/btn_register"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="35dp"
+                    android:text="pute" />
+            </LinearLayout>
+        </RelativeLayout>
+
 
     </android.support.v4.widget.DrawerLayout>
 
