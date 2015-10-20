@@ -14,50 +14,37 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- activity view -->
         <FrameLayout
             android:id="@+id/contentFrame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- navigation drawer -->
-        <!--<RelativeLayout
-            android:layout_gravity="left|start"
-            android:layout_width="match_parent"
-            android:background="#fff"
-            android:layout_height="match_parent">
-
-            <ListView
-                android:id="@+id/left_drawer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="#eee"
-                android:background="#fff"
-                android:dividerHeight="1dp" />
-        </RelativeLayout>-->
         <RelativeLayout
             android:id="@+id/left_drawer_relative_layout"
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:orientation="vertical"
-            android:background="@color/White">
+            android:background="@color/White"
+            android:orientation="vertical">
+
             <Space
                 android:id="@+id/left_space"
                 android:layout_width="match_parent"
-                android:layout_height="10dp"/>
+                android:layout_height="10dp" />
+
             <ListView
                 android:id="@+id/left_drawer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/left_space"
                 android:layout_above="@+id/btn_new"
+                android:layout_below="@id/left_space"
                 android:choiceMode="singleChoice"
                 android:divider="@android:color/transparent"
                 android:dividerHeight="0dp" />
 
             <LinearLayout
                 android:id="@+id/btn_new"
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_alignParentBottom="true"
@@ -65,21 +52,31 @@
 
                 <Button
                     android:id="@+id/btn_login"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="35dp"
-                    android:text="pute" />
+                    android:layout_weight="1"
+                    android:background="@drawable/pink_flat_button"
+                    android:text="@string/login"
+                    android:textAllCaps="false"
+                    android:textColor="@color/White" />
+
+                <Space
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/Light_Grey"/>
 
                 <Button
                     android:id="@+id/btn_register"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="35dp"
-                    android:text="pute" />
+                    android:layout_weight="1"
+                    android:background="@drawable/pink_flat_button"
+                    android:text="@string/register"
+                    android:textAllCaps="false"
+                    android:textColor="@color/White" />
             </LinearLayout>
         </RelativeLayout>
-
-
     </android.support.v4.widget.DrawerLayout>
-
 </LinearLayout>

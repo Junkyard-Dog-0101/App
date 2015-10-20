@@ -3,8 +3,6 @@ package com.eloviz.app;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,15 +11,13 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.eloviz.app.webRTC.WebRTCStreamFragment;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
 
 import org.apache.http.Header;
-import org.apache.http.client.HttpResponseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.webrtc.PeerConnection;
 
 public class StreamingListFragment extends ADrawerFragment {
 
@@ -41,7 +37,7 @@ public class StreamingListFragment extends ADrawerFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        AppRestClient.get("api/streams", null, new JsonHttpResponseHandler() {
+        AppRestClient.get("/streams", null, new JsonHttpResponseHandler() {
 
             @Override
             public void onStart() {

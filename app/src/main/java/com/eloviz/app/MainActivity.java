@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -62,6 +63,27 @@ public class MainActivity extends AppCompatActivity {
         selectItem(0);
         //FragmentManager fragmentManager = getSupportFragmentManager();
         //fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
+        final Button registerButton = (Button) findViewById(R.id.btn_register);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.contentFrame, new RegisterFragment()).commit();
+                setTitle(R.string.register);
+                mDrawerLayout.closeDrawer(mDrawerRelativeLayout);
+            }
+        });
+
+        final Button loginButton = (Button) findViewById(R.id.btn_login);
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
+                setTitle(R.string.login);
+                mDrawerLayout.closeDrawer(mDrawerRelativeLayout);
+            }
+        });
     }
 
 

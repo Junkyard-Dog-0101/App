@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,8 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,22 +33,22 @@ public class LoginFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final ImageView logo = (ImageView) getActivity().findViewById(R.id.logoEloviz);
-        logo.setVisibility(View.INVISIBLE);
+        final ImageView logo = (ImageView) getActivity().findViewById(R.id.logo_eloviz);
+       // logo.setVisibility(View.INVISIBLE);
 
         final EditText password = (EditText) getActivity().findViewById(R.id.password_input);
         password.setTypeface(Typeface.MONOSPACE);
-        password.setVisibility(View.INVISIBLE);
+      //  password.setVisibility(View.INVISIBLE);
 
         final EditText login = (EditText) getActivity().findViewById(R.id.login_input);
         login.setTypeface(Typeface.MONOSPACE);
-        login.setVisibility(View.INVISIBLE);
+     //   login.setVisibility(View.INVISIBLE);
 
-        final Button connectionButton = (Button) getActivity().findViewById(R.id.connectionButton);
-        connectionButton.setVisibility(View.INVISIBLE);
+        final Button connectionButton = (Button) getActivity().findViewById(R.id.login_button);
+      //  connectionButton.setVisibility(View.INVISIBLE);
 
-        final Button skipButton = (Button) getActivity().findViewById(R.id.skipButton);
-        skipButton.setVisibility(View.INVISIBLE);
+       // final Button skipButton = (Button) getActivity().findViewById(R.id.skipButton);
+       // skipButton.setVisibility(View.INVISIBLE);
 
         DisplayMetrics displayMetrics = getActivity().getBaseContext().getResources().getDisplayMetrics();
         float heightDp = displayMetrics.heightPixels / displayMetrics.density;
@@ -65,7 +62,7 @@ public class LoginFragment extends Fragment {
 
         final float pixelcount = finalPos * availableDensity;
         final TranslateAnimation animation = new TranslateAnimation(0, 0, pixelcount, pixelcount);
-
+/*
         animation.setDuration(1500);
         animation.setAnimationListener(new TranslateAnimation.AnimationListener() {
             @Override
@@ -116,7 +113,7 @@ public class LoginFragment extends Fragment {
                 skipButton.setAnimation(AnimationUtils.loadAnimation(getActivity().getBaseContext(), R.anim.fade_in));
                 tryLogin();
             }
-        }, 2600);
+        }, 2600);*/
 
       /* skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,23 +182,23 @@ public class LoginFragment extends Fragment {
         });
 
 
-        final Button registerButton = (Button) getActivity().findViewById(R.id.registerButton);
+      /*  final Button registerButton = (Button) getActivity().findViewById(R.id.btn_register);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.contentFrame, new RegisterFragment()).commit();
             }
-        });
+        });*/
 
 
-        skipButton.setOnClickListener(new View.OnClickListener() {
+        /*skipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ALoginActivity mainActivity = (ALoginActivity) getActivity();
                 mainActivity.launchDrawer();
             }
-        });
+        });*/
 
         //boolean silent =
 

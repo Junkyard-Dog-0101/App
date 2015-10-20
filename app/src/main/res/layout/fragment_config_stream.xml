@@ -26,29 +26,6 @@
 
         <TextView
             android:gravity="center_vertical"
-            android:id="@+id/textViewPseudo"
-            android:textColor="@color/Black"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:textSize="16sp"
-            android:layout_weight="0.5"
-            android:text="Pseudo" />
-
-        <EditText
-            android:gravity="center_vertical"
-            android:id="@+id/textInputPseudo"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:hint="Android" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:gravity="center_vertical"
             android:id="@+id/textViewRoom"
             android:textColor="@color/Black"
             android:layout_width="0dp"
@@ -78,12 +55,37 @@
             android:layout_height="match_parent"
             android:layout_weight="0.5"
             android:textSize="16sp"
-            android:text="Private" />
+            android:text="@string/private_room" />
 
         <CheckBox
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/checkBox"
+            android:layout_weight="0.5"
+            android:gravity="center_vertical"
+            />
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:gravity="center_vertical"
+            android:id="@+id/hide_text_view"
+            android:textColor="@color/Black"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:textSize="16sp"
+            android:text="@string/hide" />
+
+        <CheckBox
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/hide_check_box"
             android:layout_weight="0.5"
             android:gravity="center_vertical"
             />
@@ -100,7 +102,7 @@
             android:layout_width="300dp"
             android:layout_height="40dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/blue_flat_button"
+            android:background="@drawable/blue_round_flat_button"
             android:text="@string/validateConf"
             android:textColor="@android:color/white"
             android:textSize="14sp"
