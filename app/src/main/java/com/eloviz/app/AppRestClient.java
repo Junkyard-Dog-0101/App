@@ -14,8 +14,16 @@ public class AppRestClient {
         client.get(getAbsoluteUrl(url), params, responseHandler);
     }
 
+    public static void setOAuthHeader(String oAOuthString) {
+        client.addHeader("Authorization", "Bearer " + oAOuthString);
+    }
+
     public static void get(String BASE_URL, String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.get(getAbsoluteUrl(BASE_URL, url), params, responseHandler);
+    }
+
+    public static void get(String url, AsyncHttpResponseHandler responseHandler) {
+        client.get(getAbsoluteUrl(BASE_URL, url), responseHandler);
     }
 
     public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {

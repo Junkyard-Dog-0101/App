@@ -34,21 +34,14 @@ public class LoginFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         final ImageView logo = (ImageView) getActivity().findViewById(R.id.logo_eloviz);
-       // logo.setVisibility(View.INVISIBLE);
 
         final EditText password = (EditText) getActivity().findViewById(R.id.password_input);
         password.setTypeface(Typeface.MONOSPACE);
-      //  password.setVisibility(View.INVISIBLE);
 
         final EditText login = (EditText) getActivity().findViewById(R.id.login_input);
         login.setTypeface(Typeface.MONOSPACE);
-     //   login.setVisibility(View.INVISIBLE);
 
         final Button connectionButton = (Button) getActivity().findViewById(R.id.login_button);
-      //  connectionButton.setVisibility(View.INVISIBLE);
-
-       // final Button skipButton = (Button) getActivity().findViewById(R.id.skipButton);
-       // skipButton.setVisibility(View.INVISIBLE);
 
         DisplayMetrics displayMetrics = getActivity().getBaseContext().getResources().getDisplayMetrics();
         float heightDp = displayMetrics.heightPixels / displayMetrics.density;
@@ -130,13 +123,17 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 RequestParams params = new RequestParams();
-                params.put("username", login.getText());
+                final String mLogin = login.getText().toString();
+                params.put("username", login.getText().toString());
                 params.put("grant_type", "password");
-                params.put("password", password.getText());
+                params.put("password", password.getText().toString());
+
+                Log.e("username", mLogin);
+                Log.e("password", password.getText().toString());
                 // params.put("refresh_token", "");
                 //params.put("scope", "data");
 
-                AppRestClient.post("oauth/access_token", params, new JsonHttpResponseHandler() {
+                AppRestClient.post("/oauth/access_token", params, new JsonHttpResponseHandler() {
 
                     @Override
                     public void onStart() {
@@ -146,7 +143,7 @@ public class LoginFragment extends Fragment {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         // Log.e("toto", timeline.toString());
-                        ALoginActivity mainActivity = (ALoginActivity) getActivity();
+                       AMainActivity mainActivity = (AMainActivity) getActivity();
                         String accessToken = null, tokenType = null, refreshToken = null;
                         Integer expiresIn = null;
                         try {
@@ -159,16 +156,14 @@ public class LoginFragment extends Fragment {
                             e.printStackTrace();
                         }
                         if (accessToken != null && tokenType != null && expiresIn != null && refreshToken != null) {
-                            mainActivity.launchDrawer(accessToken, tokenType, expiresIn, refreshToken);
-                        } else {
-
+                            mainActivity.login(accessToken, tokenType, expiresIn, refreshToken, mLogin);
                         }
                     }
 
                     @Override
                     public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                         //called when response HTTP status is "4XX" (eg. 401, 403, 404)
-                        Log.e("toto", errorResponse.toString());
+//                        Log.e("toto", errorResponse.toString());
                     }
 
                     @Override
@@ -225,7 +220,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 // Log.e("toto", timeline.toString());
-                ALoginActivity mainActivity = (ALoginActivity) getActivity();
+                AMainActivity mainActivity = (AMainActivity) getActivity();
                 String accessToken = null, tokenType = null, refreshToken = null;
                 Integer expiresIn = null;
                 try {
@@ -238,9 +233,7 @@ public class LoginFragment extends Fragment {
                     e.printStackTrace();
                 }
                 if (accessToken != null && tokenType != null && expiresIn != null && refreshToken != null) {
-                    mainActivity.launchDrawer(accessToken, tokenType, expiresIn, refreshToken);
-                } else {
-
+                   // mainActivity.login(accessToken, tokenType, expiresIn, refreshToken);
                 }
             }
 

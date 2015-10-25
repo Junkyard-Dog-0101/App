@@ -44,38 +44,56 @@
 
             <LinearLayout
                 android:id="@+id/btn_new"
-                style="?android:attr/buttonBarStyle"
+
                 android:layout_width="match_parent"
-                android:layout_height="35dp"
+                android:layout_height="70dp"
                 android:layout_alignParentBottom="true"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/btn_login"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="35dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pink_flat_button"
-                    android:text="@string/login"
-                    android:textAllCaps="false"
-                    android:textColor="@color/White" />
+                    android:orientation="horizontal">
 
-                <Space
-                    android:layout_width="2dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/Light_Grey"/>
+                    <TextView
+                        android:id="@+id/textLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </LinearLayout>
 
-                <Button
-                    android:id="@+id/btn_register"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    style="?android:attr/buttonBarStyle"
+                    android:layout_width="match_parent"
                     android:layout_height="35dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pink_flat_button"
-                    android:text="@string/register"
-                    android:textAllCaps="false"
-                    android:textColor="@color/White" />
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_login"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="35dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/pink_flat_button"
+                        android:text="@string/login"
+                        android:textAllCaps="false"
+                        android:textColor="@color/White" />
+
+                    <Space
+                        android:layout_width="2dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/Light_Grey" />
+
+                    <Button
+                        android:id="@+id/btn_register"
+                        style="?android:attr/buttonBarButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="35dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/pink_flat_button"
+                        android:text="@string/register"
+                        android:textAllCaps="false"
+                        android:textColor="@color/White" />
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
     </android.support.v4.widget.DrawerLayout>
