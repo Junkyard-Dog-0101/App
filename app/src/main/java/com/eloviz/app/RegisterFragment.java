@@ -13,7 +13,7 @@ import android.widget.EditText;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.apache.http.Header;
+import cz.msebera.android.httpclient.Header;
 
 public class RegisterFragment extends Fragment {
 

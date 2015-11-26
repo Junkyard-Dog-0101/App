@@ -8,19 +8,27 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.eloviz.app.models.Oauth;
-import com.github.nkzawa.socketio.client.Socket;
+import io.socket.client.Socket;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import cz.msebera.android.httpclient.Header;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AMainActivity {
     static Socket socket = null;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
@@ -33,6 +41,63 @@ public class MainActivity extends AppCompatActivity {
     private boolean isLogin = false;
     private Oauth token = null;
 
+    public void login(String accessToken, String tokenType, Integer expiresIn, String refreshToken, String login) {
+        token = new Oauth(accessToken, tokenType, expiresIn, refreshToken);
+        final TextView textView = (TextView) findViewById(R.id.textLogin);
+        RequestParams params;
+        AppRestClient.setOAuthHeader(accessToken);
+        AppRestClient.get("/me", new JsonHttpResponseHandler() {
+
+            @Override
+            public void onStart() {
+                // called before request is started
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                // Log.e("toto", timeline.toString());
+                Log.e("toto", response.toString());
+                try {
+                    textView.setText("Bienvenue " + response.get("username"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //  AMainActivity mainActivity = (AMainActivity) getActivity();
+                /*String accessToken = null, tokenType = null, refreshToken = null;
+                Integer expiresIn = null;
+                try {
+                    accessToken = response.getString("access_token");
+                    tokenType = response.getString("token_type");
+                    expiresIn = response.getInt("expires_in");
+                    refreshToken = response.getString("refresh_token");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (accessToken != null && tokenType != null && expiresIn != null && refreshToken != null) {
+                    mainActivity.login(accessToken, tokenType, expiresIn, refreshToken, mLogin);
+                }*/
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                //called when response HTTP status is "4XX" (eg. 401, 403, 404)
+//                        Log.e("toto", errorResponse.toString());
+            }
+
+            @Override
+            public void onRetry(int retryNo) {
+                // called when request is retried
+            }
+        });
+        token.save(this);
+        isLogin = true;
+    }
+
+    public void login() {
+        isLogin = false;
+    }
 
  /*   @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +127,27 @@ public class MainActivity extends AppCompatActivity {
         selectItem(0);
         //FragmentManager fragmentManager = getSupportFragmentManager();
         //fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
+        final Button registerButton = (Button) findViewById(R.id.btn_register);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.contentFrame, new RegisterFragment()).commit();
+                setTitle(R.string.register);
+                mDrawerLayout.closeDrawer(mDrawerRelativeLayout);
+            }
+        });
+
+        final Button loginButton = (Button) findViewById(R.id.btn_login);
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.contentFrame, new LoginFragment()).commit();
+                setTitle(R.string.login);
+                mDrawerLayout.closeDrawer(mDrawerRelativeLayout);
+            }
+        });
     }
 
 

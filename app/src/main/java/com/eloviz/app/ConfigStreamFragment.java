@@ -11,13 +11,12 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 
+import com.eloviz.app.webRTC.WebRTCStreamFragment;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.apache.http.Header;
-import org.json.JSONArray;
+import cz.msebera.android.httpclient.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,16 +57,10 @@ public class ConfigStreamFragment extends ADrawerFragment {
                 final FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 final Fragment fragment = new WebRTCStreamFragment();
                 EditText editText = (EditText) getActivity().findViewById(R.id.textInputRoom);
-
-                String string;
-
-
                 final Bundle bundle = new Bundle();
                 if (editText.getText().toString().equals("")) {
-                    string = "simplechat";
-                    bundle.putString("room", "simplechat");
+
                 } else {
-                    string = editText.getText().toString();
 
                     Log.e("lol", editText.getText().toString());/*  tester demain */
                 }
@@ -76,32 +69,6 @@ public class ConfigStreamFragment extends ADrawerFragment {
                 params.add("title", editText.getText().toString());
 
                 AppRestClient.post("api/streams", params, new JsonHttpResponseHandler() {
-
-                    @Override
-                    public void onStart() {
-                        // called before request is started
-                    }
-
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                        Log.e("pute", "onsuccesARRAY");
-
-                        try {
-                            bundle.putString("room", ((JSONObject) response.get(0)).getString("title"));
-                        } catch (JSONException e) {
-                            bundle.putString("room", "simplechat");
-                            e.printStackTrace();
-                        }
-                        fragment.setArguments(bundle);
-                        //fragmentManager.bac
-                        fragmentManager.beginTransaction().add(R.id.contentFrame, fragment).addToBackStack("fragBack").commit();
-                        //          Lis    getActivity().findViewById(R.id.textViewStreamingItem);
-                        //   accessToken = response.getString("access_token");
-                        //     tokenType = response.getString("token_type");
-                        ///  expiresIn = response.getInt("expires_in");
-                        /// refreshToken = response.getString("refresh_token");
-                    }
-
 
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

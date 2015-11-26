@@ -7,9 +7,13 @@
     <string name="action_websearch">Recherche web</string>
     <string name="app_not_available">Désolé, il n\'y a pas de navigateur web disponible</string>
     <string name="password">Mot de passe</string>
-    <string name="login">Login</string>
+    <string name="login">Connexion</string>
     <string name="validateConf">Valider</string>
     <string name="connection">Connexion</string>
     <string name="register">Inscription</string>
     <string name="skip">Passer</string>
+    <string name="email">Email</string>
+    <string name="logo">Logo</string>
+    <string name="private_room">Priver</string>
+    <string name="hide">Cacher</string>
 </resources>

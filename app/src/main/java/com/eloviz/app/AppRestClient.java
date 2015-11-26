@@ -6,7 +6,7 @@ import com.loopj.android.http.RequestParams;
 
 public class AppRestClient {
 
-    private static final String BASE_URL = "http://eloviz.com/";
+    private static final String BASE_URL = "http://api.eloviz.com";
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 
@@ -14,8 +14,16 @@ public class AppRestClient {
         client.get(getAbsoluteUrl(url), params, responseHandler);
     }
 
+    public static void setOAuthHeader(String oAOuthString) {
+        client.addHeader("Authorization", "Bearer " + oAOuthString);
+    }
+
     public static void get(String BASE_URL, String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.get(getAbsoluteUrl(BASE_URL, url), params, responseHandler);
+    }
+
+    public static void get(String url, AsyncHttpResponseHandler responseHandler) {
+        client.get(getAbsoluteUrl(BASE_URL, url), responseHandler);
     }
 
     public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
