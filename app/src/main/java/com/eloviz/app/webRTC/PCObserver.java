@@ -15,6 +15,11 @@ import org.webrtc.VideoRenderer;
 public class PCObserver  {
 
     /*private final String LOG_TAG = this.getClass().getSimpleName();
+=======
+public class PCObserver implements PeerConnection.Observer {
+
+    private final String LOG_TAG = this.getClass().getSimpleName();
+>>>>>>> 68ee1b78c43d1cf974a77e539422d11d9e7449ca
     private String mId;
     private Activity mActivity;
     private VideoStreamsView mVideoStreamsView;
@@ -96,6 +101,7 @@ public class PCObserver  {
     @Override
     public void onRenegotiationNeeded() {
 
+<<<<<<< HEAD
     }*/
 
 }

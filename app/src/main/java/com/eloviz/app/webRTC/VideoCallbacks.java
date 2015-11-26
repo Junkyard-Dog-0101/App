@@ -1,10 +1,19 @@
 package com.eloviz.app.webRTC;
 
 
+
 import org.webrtc.VideoRenderer;
 
 public class VideoCallbacks {
 /*
+=======
+import com.eloviz.app.VideoStreamsView;
+
+import org.webrtc.VideoRenderer;
+
+public class VideoCallbacks implements VideoRenderer.Callbacks {
+
+>>>>>>> 68ee1b78c43d1cf974a77e539422d11d9e7449ca
     private final VideoStreamsView view;
     private final VideoStreamsView.Endpoint stream;
 

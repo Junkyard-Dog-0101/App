@@ -490,7 +490,6 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         MediaConstraints mc = new MediaConstraints();
         MediaConstraints.KeyValuePair dtls = new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true");
         mc.mandatory.add(dtls);
-
         final PeerConnection newPeer = factory.createPeerConnection(mIceServerList, mc, new PCObserver(idString, getActivity()));
 
         newPeer.addStream(lMS);
@@ -557,7 +556,6 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         }
     }
 
-
 /*
         socket.on("newMessage", new Emitter.Listener() {
             @Override
@@ -609,6 +607,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                     Log.i(LOG_TAG, "peer leave " + id);
                 }
             }
+<<<<<<< HEAD:app/src/main/java/com/eloviz/app/webRTC/WebRTCStreamFragment.java
         });*/
 
 public class PCObserver implements PeerConnection.Observer {
