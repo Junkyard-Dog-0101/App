@@ -16,6 +16,7 @@ import io.socket.emitter.Emitter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.CameraEnumerationAndroid;
 import org.webrtc.DataChannel;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
@@ -27,6 +28,7 @@ import org.webrtc.RendererCommon;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
+import org.webrtc.VideoCapturerAndroid;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
@@ -90,7 +92,23 @@ public class WebRTCStreamFragment extends ADrawerFragment {
     }
 
     public VideoCapturer getVideoCapturer() {
-        String[] cameraFacing={"front","back"};
+        int numberOfCameras;
+        numberOfCameras = CameraEnumerationAndroid.getDeviceCount();
+
+        String cameraDeviceName = CameraEnumerationAndroid.getDeviceName(0);
+        String frontCameraDeviceName = CameraEnumerationAndroid.getNameOfFrontFacingDevice();
+        if (numberOfCameras > 1 && frontCameraDeviceName != null) {
+            cameraDeviceName = frontCameraDeviceName;
+        }
+      //  Log.d(TAG, "Opening camera: " + cameraDeviceName);
+        VideoCapturer capturer;
+        capturer = VideoCapturerAndroid.create(cameraDeviceName, null);
+        if (capturer == null) {
+       //    reportError("Failed to open camera");
+            return null;
+        }
+        return capturer;
+       /* String[] cameraFacing={"front","back"};
         int[] cameraIndex={0,1};
         int[] cameraOrientation={0,90,180,270};
         for (String facing : cameraFacing) {
@@ -105,7 +123,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                 }
             }
         }
-        throw new RuntimeException("Failed to open capturer");
+        throw new RuntimeException("Failed to open capturer");*/
     }
 
     @Override
