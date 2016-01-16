@@ -69,7 +69,7 @@ public class ConfigStreamFragment extends ADrawerFragment {
                 RequestParams params = new RequestParams();
                 params.add("title", editText.getText().toString());
 
-                AppRestClient.post("api/streams", params, new JsonHttpResponseHandler() {
+                AppRestClient.post("/streams", params, new JsonHttpResponseHandler() {
 
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {

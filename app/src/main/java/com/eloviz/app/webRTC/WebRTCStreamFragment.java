@@ -2,18 +2,28 @@ package com.eloviz.app.webRTC;
 
 import android.app.Activity;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.format.DateFormat;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.eloviz.app.ADrawerFragment;
+import com.eloviz.app.AppRestClient;
 import com.eloviz.app.R;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
+import cz.msebera.android.httpclient.Header;
 import io.socket.emitter.Emitter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.CameraEnumerationAndroid;
@@ -34,6 +44,7 @@ import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,11 +111,11 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         if (numberOfCameras > 1 && frontCameraDeviceName != null) {
             cameraDeviceName = frontCameraDeviceName;
         }
-      //  Log.d(TAG, "Opening camera: " + cameraDeviceName);
+        //  Log.d(TAG, "Opening camera: " + cameraDeviceName);
         VideoCapturer capturer;
         capturer = VideoCapturerAndroid.create(cameraDeviceName, null);
         if (capturer == null) {
-       //    reportError("Failed to open camera");
+            //    reportError("Failed to open camera");
             return null;
         }
         return capturer;
@@ -126,73 +137,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         throw new RuntimeException("Failed to open capturer");*/
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        scalingType = RendererCommon.ScalingType.SCALE_ASPECT_FILL;
-
-        Point displaySize = new Point();
-        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.vsvLayout);
-        getActivity().getWindowManager().getDefaultDisplay().getSize(displaySize);
-        displaySize.y = 600;
-
-        //vsv = new VideoStreamsView(getActivity(), displaySize);
-       // layout.addView(vsv);
-        localRender = (SurfaceViewRenderer) getActivity().findViewById(R.id.local_video_view);
-        remoteRender = (SurfaceViewRenderer) getActivity().findViewById(R.id.remote_video_view);
-        localRenderLayout = (PercentFrameLayout) getActivity().findViewById(R.id.local_video_layout);
-        remoteRenderLayout = (PercentFrameLayout) getActivity().findViewById(R.id.remote_video_layout);
-        rootEglBase = new EglBase();
-        localRender.init(rootEglBase.getContext(), null);
-        remoteRender.init(rootEglBase.getContext(), null);
-        localRender.setZOrderMediaOverlay(true);
-
-        remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
-        remoteRender.setScalingType(scalingType);
-        remoteRender.setMirror(false);
-        localVideoTrack = null;
-        remoteVideoTrack = null;
-        //if (iceConnected) {
-      //      localRenderLayout.setPosition(LOCAL_X_CONNECTED, LOCAL_Y_CONNECTED, LOCAL_WIDTH_CONNECTED, LOCAL_HEIGHT_CONNECTED);
-      //      localRender.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
-     //   } else {
-            localRenderLayout.setPosition(LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
-            localRender.setScalingType(scalingType);
-    //    }
-        localRender.setMirror(true);
-
-        localRender.requestLayout();
-        remoteRender.requestLayout();
-       /* AppRestClient.get("http://webrtc.dennajort.fr/", "iceServers.json", null, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                JSONArray responseArray = null;
-                try {
-                    responseArray = new JSONArray("{ \"iceServers\": [ {\"url\": \"stun:stun01.sipphone.com\"}, {\"url\": \"stun:stun.ekiga.net\"}, {\"url\": \"stun:stun.fwdnet.net\"}, {\"url\": \"stun:stun.ideasip.com\"}, {\"url\": \"stun:stun.iptel.org\"}, {\"url\": \"stun:stun.rixtelecom.se\"}, {\"url\": \"stun:stun.schlund.de\"}, {\"url\": \"stun:stun.l.google.com:19302\"}, {\"url\": \"stun:stun1.l.google.com:19302\"}, {\"url\": \"stun:stun2.l.google.com:19302\"}, {\"url\": \"stun:stun3.l.google.com:19302\"}, {\"url\": \"stun:stun4.l.google.com:19302\"}, {\"url\": \"stun:stunserver.org\"}, {\"url\": \"stun:stun.softjoys.com\"}, {\"url\": \"stun:stun.voiparound.com\"}, {\"url\": \"stun:stun.voipbuster.com\"}, {\"url\": \"stun:stun.voipstunt.com\"}, {\"url\": \"stun:stun.voxgratia.org\"}, {\"url\": \"stun:stun.xten.com\"}, {\"url\": \"turn:numb.viagenie.ca\", \"credential\": \"muazkh\", \"username\": \"webrtc@live.com\"}, {\"url\": \"turn:192.158.29.39:3478?transport=udp\", \"credential\": \"JZEOEt2V3Qb0y27GRntt2u2PAYA=\", \"username\": \"28224511:1379330808\"}, {\"url\": \"turn:192.158.29.39:3478?transport=tcp\", \"credential\": \"JZEOEt2V3Qb0y27GRntt2u2PAYA=\", \"username\": \"28224511:1379330808\"} ] }");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    responseArray = (JSONArray) response.get("iceServers");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                for (int i = 0; i < responseArray.length(); i++) {
-                    try {
-                        mIceServerList.add(new PeerConnection.IceServer(responseArray.getJSONObject(i).getString("url")));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                socket.connect();
-                Log.i(LOG_TAG, "startStream");
-                socket.emit("startStream");
-
-            }
-        });*/
-
-
+    private void loadSocket() {
         try {
             mSocket.createSocket();
         } catch (URISyntaxException e) {
@@ -272,6 +217,9 @@ public class WebRTCStreamFragment extends ADrawerFragment {
                         case "renegotiateBack":
                             renegotiateBack(data);
                             break;
+                        case "textMessage":
+                            onMessage(data);
+                            break;
                     }
             }
         });
@@ -281,16 +229,96 @@ public class WebRTCStreamFragment extends ADrawerFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        scalingType = RendererCommon.ScalingType.SCALE_ASPECT_FILL;
+
+        Point displaySize = new Point();
+        getActivity().getWindowManager().getDefaultDisplay().getSize(displaySize);
+        displaySize.y = 600;
+        localRender = (SurfaceViewRenderer) getActivity().findViewById(R.id.local_video_view);
+        remoteRender = (SurfaceViewRenderer) getActivity().findViewById(R.id.remote_video_view);
+        localRenderLayout = (PercentFrameLayout) getActivity().findViewById(R.id.local_video_layout);
+        remoteRenderLayout = (PercentFrameLayout) getActivity().findViewById(R.id.remote_video_layout);
+        rootEglBase = new EglBase();
+        localRender.init(rootEglBase.getContext(), null);
+        remoteRender.init(rootEglBase.getContext(), null);
+        localRender.setZOrderMediaOverlay(true);
+
+        remoteRenderLayout.setPosition(REMOTE_X, REMOTE_Y, REMOTE_WIDTH, REMOTE_HEIGHT);
+        remoteRender.setScalingType(scalingType);
+        remoteRender.setMirror(false);
+        localVideoTrack = null;
+        remoteVideoTrack = null;
+        localRenderLayout.setPosition(LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING, LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING);
+        localRender.setScalingType(scalingType);
+        localRender.setMirror(true);
+
+        localRender.requestLayout();
+        remoteRender.requestLayout();
+        AppRestClient.get("/iceServers.json", new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                String url;
+                String username;
+                String credential;
+                for (int i = 0; i < response.length(); ++i) {
+                    url = null;
+                    username = null;
+                    credential = null;
+                    JSONObject server = null;
+                    try {
+                        server = response.getJSONObject(i);
+                        url = server.getString("url");
+                        username = server.getString("username");
+                        credential = server.getString("credential");
+                        mIceServerList.add(new PeerConnection.IceServer(url, username, credential));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (url != null) {
+                            mIceServerList.add(new PeerConnection.IceServer(url));
+                        }
+                    }
+                }
+                loadSocket();
+            }
+        });
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-        if (mPc != null)
+
+        Log.e(LOG_TAG, "mPc");
+        if (mPc != null) {
             mPc.dispose();
-        if (lMS != null)
-            lMS.dispose();
-        if (mVideoSource != null)
-            mVideoSource.dispose();
-        if (factory != null)
+            mPc = null;
+            // mPc.dispose();
+        }
+        Log.e(LOG_TAG, "mVideoSource");
+        if (mVideoSource != null) {
+            mVideoSource.stop();
+            // mVideoSource.dispose();
+            mVideoSource = null;
+            // mVideoSource.dispose();
+        }
+        Log.e(LOG_TAG, "factory");
+        if (factory != null) {
+            //factory.dispose();
+            factory = null;
+        }
+       /* if (factory != null)
             factory.dispose();
+        if (mVideoSource != null) {
+            mVideoSource.stop();
+         // mVideoSource.dispose();
+        }*/
+        Log.e(LOG_TAG, "lMS");
+
+       /* if (lMS != null) {
+            lMS.dispose();
+        }*/
     }
 
     private void hello(JSONObject data) {
@@ -371,14 +399,14 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         pc.setRemoteDescription(new SDPObserver() {
             @Override
             public void onSetSuccess() {
-                Log.e("fsdfs","test3");
+                Log.e("fsdfs", "test3");
                 MediaConstraints constraints = new MediaConstraints();
                 constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "false"));
                 constraints.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
                 pc.createAnswer(new SDPObserver() {
                     @Override
                     public void onCreateSuccess(final SessionDescription sessionDescription) {
-                        Log.e("fsdfs","test2");
+                        Log.e("fsdfs", "test2");
                         pc.setLocalDescription(new SDPObserver() {
                             @Override
                             public void onSetSuccess() {
@@ -454,42 +482,7 @@ public class WebRTCStreamFragment extends ADrawerFragment {
             peer.addIceCandidate(new IceCandidate(sdpMid, Integer.valueOf(sdpMLineIndex), sdp));
         }
     }
-  /*  sdp: "v=0
-            ↵o=- 7568057190010547481 2 IN IP4 127.0.0.1
-            ↵s=-
-            ↵t=0 0
-            ↵a=group:BUNDLE audio
-    ↵a=msid-semantic: WMS aWxsPOzRU0bIfzwhpcPfTZWo8IQvVDk8yVBx
-    ↵m=audio 9 UDP/TLS/RTP/SAVPF 111 103 104 9 0 8 106 105 13 126
-            ↵c=IN IP4 0.0.0.0
-            ↵a=rtcp:9 IN IP4 0.0.0.0
-            ↵a=ice-ufrag:UkLFUs1RqcjHXyCT
-    ↵a=ice-pwd:83eo/AqBVdllWSCREPogk/yL
-    ↵a=fingerprint:sha-256 6D:68:BC:04:44:A9:47:99:70:2C:6B:AC:D1:75:02:27:5E:B9:DD:96:6B:E8:68:7D:79:CF:CE:41:52:47:76:AD
-    ↵a=setup:actpass
-    ↵a=mid:audio
-    ↵a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level
-    ↵a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time
-            ↵a=sendrecv
-    ↵a=rtcp-mux
-    ↵a=rtpmap:111 opus/48000/2
-            ↵a=fmtp:111 minptime=10; useinbandfec=1
-            ↵a=rtpmap:103 ISAC/16000
-            ↵a=rtpmap:104 ISAC/32000
-            ↵a=rtpmap:9 G722/8000
-            ↵a=rtpmap:0 PCMU/8000
-            ↵a=rtpmap:8 PCMA/8000
-            ↵a=rtpmap:106 CN/32000
-            ↵a=rtpmap:105 CN/16000
-            ↵a=rtpmap:13 CN/8000
-            ↵a=rtpmap:126 telephone-event/8000
-            ↵a=maxptime:60
-            ↵a=ssrc:1233041855 cname:DLIZ4mEGPzMzIHAS
-    ↵a=ssrc:1233041855 msid:aWxsPOzRU0bIfzwhpcPfTZWo8IQvVDk8yVBx fee8f1f0-e1ca-4dc5-8d8c-9ca3646f58ff
-    ↵a=ssrc:1233041855 mslabel:aWxsPOzRU0bIfzwhpcPfTZWo8IQvVDk8yVBx
-    ↵a=ssrc:1233041855 label:fee8f1f0-e1ca-4dc5-8d8c-9ca3646f58ff
-    ↵"
-*/
+
     private void renegotiate(JSONObject data) {
         Log.i(LOG_TAG, "renegociate");
         String buf;
@@ -574,37 +567,30 @@ public class WebRTCStreamFragment extends ADrawerFragment {
         }
     }
 
-/*
-        socket.on("newMessage", new Emitter.Listener() {
+
+    public void onMessage(JSONObject data) {
+        Log.e("from", data.toString());
+        JSONObject buf = null;
+        String buf2 = null;
+        Date d = new Date();
+        final CharSequence s = DateFormat.format("kk:mm", d.getTime());
+        try {
+            //JSONObject buf = data.getString("data");
+            buf = data.getJSONObject("data");
+            buf2 = buf.getString("message");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        final String message = buf2;
+        getActivity().runOnUiThread(new Runnable() {
             @Override
-            public void call(final Object... args) {
-                JSONObject jsonMessage = (JSONObject) args[0];
-                String buf = "username";
-                String buf2 = null;
-                Date d = new Date();
-                final CharSequence s = DateFormat.format("kk:mm", d.getTime());
-                try {
-                    buf = jsonMessage.getString("from");
-                    buf2 = jsonMessage.getString("message");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                final String from = buf;
-                final String message = buf2;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        TextView textView = (TextView) getActivity().findViewById(R.id.textOutput);
-                        SpannableString spanString = new SpannableString(from);
-                        spanString.setSpan(new StyleSpan(Typeface.BOLD), 0, spanString.length(), 0);
-                        textView.append(s + " ");
-                        textView.append(spanString);
-                        textView.append(" : " + message + "\n");
-                    }
-                });
+            public void run() {
+                TextView textView = (TextView) getActivity().findViewById(R.id.textOutput);
+                textView.append(message + "\n");
             }
         });
-*/
+    }
+
 
        /* socket.on(("leavingPeer"), new Emitter.Listener() {
             @Override
@@ -628,23 +614,23 @@ public class WebRTCStreamFragment extends ADrawerFragment {
 <<<<<<< HEAD:app/src/main/java/com/eloviz/app/webRTC/WebRTCStreamFragment.java
         });*/
 
-public class PCObserver implements PeerConnection.Observer {
+    public class PCObserver implements PeerConnection.Observer {
 
-    private String mId;
-    private Activity mActivity;
+        private String mId;
+        private Activity mActivity;
 
-    PCObserver(String id, Activity activity) {
-        mId = id;
-        mActivity = activity;
-    }
+        PCObserver(String id, Activity activity) {
+            mId = id;
+            mActivity = activity;
+        }
 
-    @Override
-    public void onSignalingChange(PeerConnection.SignalingState newState) {
-        Log.d(LOG_TAG, "SignalingState: " + newState);
-    }
+        @Override
+        public void onSignalingChange(PeerConnection.SignalingState newState) {
+            Log.d(LOG_TAG, "SignalingState: " + newState);
+        }
 
-    @Override
-    public void onIceConnectionChange(final PeerConnection.IceConnectionState newState) {
+        @Override
+        public void onIceConnectionChange(final PeerConnection.IceConnectionState newState) {
 
        /* executor.execute(new Runnable() {
             @Override
@@ -659,76 +645,76 @@ public class PCObserver implements PeerConnection.Observer {
                 }
             }
         });*/
-    }
+        }
 
-    @Override
-    public void onIceConnectionReceivingChange(boolean receiving) {
-        Log.d(LOG_TAG, "IceConnectionReceiving changed to " + receiving);
-    }
+        @Override
+        public void onIceConnectionReceivingChange(boolean receiving) {
+            Log.d(LOG_TAG, "IceConnectionReceiving changed to " + receiving);
+        }
 
-    @Override
-    public void onIceGatheringChange(PeerConnection.IceGatheringState newState) {
-        Log.d(LOG_TAG, "IceGatheringState: " + newState);
-    }
+        @Override
+        public void onIceGatheringChange(PeerConnection.IceGatheringState newState) {
+            Log.d(LOG_TAG, "IceGatheringState: " + newState);
+        }
 
-    @Override
-    public void onIceCandidate(final IceCandidate iceCandidate) {
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                Log.e(LOG_TAG, "onIceCandiate");
-                JSONObject obj = new JSONObject();
-                JSONObject obj2 = new JSONObject();
-                try {
-                    obj2.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
-                    obj2.put("sdpMid", iceCandidate.sdpMid);
-                    obj2.put("candidate", iceCandidate.sdp);
-                    obj.put("ice", obj2);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        @Override
+        public void onIceCandidate(final IceCandidate iceCandidate) {
+            mActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    Log.e(LOG_TAG, "onIceCandiate");
+                    JSONObject obj = new JSONObject();
+                    JSONObject obj2 = new JSONObject();
+                    try {
+                        obj2.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
+                        obj2.put("sdpMid", iceCandidate.sdpMid);
+                        obj2.put("candidate", iceCandidate.sdp);
+                        obj.put("ice", obj2);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    WebRTCSocket.getInstance().sendRemoteMessage("iceCandidate", obj, mId);
                 }
-                WebRTCSocket.getInstance().sendRemoteMessage("iceCandidate", obj, mId);
-            }
-        });
-    }
+            });
+        }
 
-    @Override
-    public void onAddStream(final MediaStream stream) {
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                // if (peerConnection == null || isError) {
-                //    return;
-                // }
-                if (stream.audioTracks.size() > 1 || stream.videoTracks.size() > 1) {
-                    //   reportError("Weird-looking stream: " + stream);
-                    return;
+        @Override
+        public void onAddStream(final MediaStream stream) {
+            mActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    // if (peerConnection == null || isError) {
+                    //    return;
+                    // }
+                    if (stream.audioTracks.size() > 1 || stream.videoTracks.size() > 1) {
+                        //   reportError("Weird-looking stream: " + stream);
+                        return;
+                    }
+                    if (stream.videoTracks.size() == 1) {
+                        remoteVideoTrack = stream.videoTracks.get(0);
+                        remoteVideoTrack.setEnabled(true);
+                        remoteVideoTrack.addRenderer(new VideoRenderer(remoteRender));
+                    }
                 }
-                if (stream.videoTracks.size() == 1) {
-                    remoteVideoTrack = stream.videoTracks.get(0);
-                    remoteVideoTrack.setEnabled(true);
-                    remoteVideoTrack.addRenderer(new VideoRenderer(remoteRender));
-                }
-            }
 //mediaStream.videoTracks.get(0).addRenderer(new VideoRenderer(new VideoCallbacks(mVideoStreamsView, VideoStreamsView.Endpoint.REMOTE)));
-        });
+            });
+        }
+
+        @Override
+        public void onRemoveStream(MediaStream mediaStream) {
+            mActivity.runOnUiThread(new Runnable() {
+                public void run() {
+                    remoteVideoTrack = null;
+                }
+            });
+        }
+
+        @Override
+        public void onDataChannel(DataChannel dataChannel) {
+
+        }
+
+        @Override
+        public void onRenegotiationNeeded() {
+
+        }
     }
-
-    @Override
-    public void onRemoveStream(MediaStream mediaStream) {
-        mActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                remoteVideoTrack = null;
-            }
-        });
-    }
-
-    @Override
-    public void onDataChannel(DataChannel dataChannel) {
-
-    }
-
-    @Override
-    public void onRenegotiationNeeded() {
-
-    }
-}
 }
