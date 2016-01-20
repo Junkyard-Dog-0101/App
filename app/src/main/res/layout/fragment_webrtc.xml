@@ -30,27 +30,6 @@
                 android:layout_height="wrap_content" />
         </com.eloviz.app.webRTC.PercentFrameLayout>
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Prev"
-            android:id="@+id/buttonPrev"
-            android:layout_weight="0.5" />
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Next"
-            android:id="@+id/buttonNext"
-            android:layout_weight="0.5" />
-
-
-    </LinearLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
